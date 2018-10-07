@@ -27,6 +27,4 @@ else:
     try:
         import klayout.db as pya
     except ImportError as err:
-        # err.args = ('klayout standalone is needed for non-GUI mode. It is not installed', ) + err.args[1:]
-        print('Attempt to import pya and klayout.db failed')
         pya = None

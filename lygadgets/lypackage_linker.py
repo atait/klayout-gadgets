@@ -69,12 +69,14 @@ def link_to_salt(lypackage_dir):
     salt_link = os.path.join(salt_dir, registered_name)
 
     # Make the symlink
-    if not is_windows():
-        os.symlink(lypackage_dir, salt_link)
+    if os.path.exists(salt_link):
+        return None
     else:
-        symlink_windows(lypackage_dir, salt_link)
-
-    return salt_link
+        if not is_windows():
+            os.symlink(lypackage_dir, salt_link)
+        else:
+            symlink_windows(lypackage_dir, salt_link)
+        return salt_link
 
 
 def post_install_factory(klayout_dot_config_dir):
@@ -89,7 +91,8 @@ def post_install_factory(klayout_dot_config_dir):
             install.run(self)
             try:
                 the_link = link_to_salt(klayout_dot_config_dir)
-                print('\n Autoinstall into klayout salt succeeded!\n{}\n'.format(the_link))
+                if the_link is not None:
+                    print('\nAutoinstall into klayout salt succeeded!\n{}\n'.format(the_link))
             except Exception as err:
                 print('Autoinstall into klayout salt failed with the following\n')
                 print(err)

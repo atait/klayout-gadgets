@@ -28,7 +28,9 @@ def get_system_version():
                      'print({}.__version__)'.format(pypackage))
     try:
         retraw = subprocess.check_output([system_python(), '-c', check_program])
-        return retraw.decode().strip("'").strip('\n')
+        all_talking = retraw.decode().strip("'").strip('\n')
+        printed_lines = all_talking.split('\n')
+        return printed_lines[-1]
     except (ImportError, ModuleNotFoundError, subprocess.CalledProcessError):
         # It's not installed at all
         return '-1'
@@ -42,7 +44,12 @@ def get_source_version(pypackage_dir):
     version_file = os.path.join(pypackage_dir, pypackage, '__init__.py')
     spec = importlib.util.spec_from_file_location(pypackage, version_file)
     source_version_module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(source_version_module)
+    try:
+        spec.loader.exec_module(source_version_module)
+    except Exception as err:
+        message_loud(('Error loading {}!\n\n{}\n\n'.format(pypackage, err) +
+                      'Get the traceback by launching klayout from command line'))
+        raise
     try:
         return source_version_module.__version__
     except AttributeError as err:
@@ -56,7 +63,9 @@ def install_from_source(source_dir):
         subprocess.check_call(install_call, cwd=source_dir)
         message('Success')
     except Exception as err:
-        message_loud('Error installing {}!\n\n{}'.format(pypackage, err))
+        message_loud(('Error installing {}!\n\n{}\n\n'.format(pypackage, err) +
+                      'Get the traceback by launching klayout from command line'))
+        raise
 
 
 def synchronize_package(pypackage_name, lypackage_dir):
