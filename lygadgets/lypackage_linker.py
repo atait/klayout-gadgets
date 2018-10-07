@@ -1,6 +1,8 @@
 import os
 from sys import platform
 import subprocess
+from setuptools.command.install import install
+
 from lygadgets.markup import xml_to_dict
 
 
@@ -63,7 +65,7 @@ def link_to_salt(lypackage_dir):
 
     # Determine the lypackage name from the grain.xml
     with open(os.path.join(lypackage_dir, 'grain.xml')) as grain:
-        registered_name = xml_to_dict(grain)['salt-grain']['name']
+        registered_name = xml_to_dict(grain.read())['salt-grain']['name']
     salt_link = os.path.join(salt_dir, registered_name)
 
     # Make the symlink

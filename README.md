@@ -1,4 +1,15 @@
 # klayout-gadgets
+Tools to make klayout and python work together better
+
+This package is pure python - no klayout_dot_config. It makes it easier to handle as a dependency. However, it does use `pya` things.
+
+Here are the rules:
+
+- no calling `klayout -r foo.py` from the command line
+- no phidl
+- no reference to particular technologies or specific types of properties (e.g. "WAVEGUIDES.xml")
+- lightweight as possible
+- `klayout.db` is allowed if it speeds it up, but it cannot be required
 
 ## Version checking
 - System version
