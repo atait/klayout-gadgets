@@ -1,4 +1,4 @@
-from lygadgets.environment import pya, isGUI
+from lygadgets import pya, isGUI
 
 if isGUI():
     main_window = pya.Application.instance().main_window()
@@ -8,4 +8,4 @@ else:
     PINK = '\033[95m'
     NORMAL_COLOR = '\033[0m'
     message = print
-    message_loud = lambda msg: print(color, msg, NORMAL_COLOR, **kwargs)
+    message_loud = lambda msg: print(PINK + str(msg), NORMAL_COLOR, **kwargs)
