@@ -103,11 +103,11 @@ def my_postinstall():
 
 ...
 
-def setup(
-          ...
-          cmdclass=my_postinstall(),
-          ...
-          )
+setup(
+      ...
+      cmdclass=my_postinstall(),
+      ...
+      )
 ```
 
 ## Environment
@@ -123,7 +123,9 @@ but this will never break:
 from lygadgets import pya
 ```
 
-however, of course, you then cannot try to use the GUI features of `pya`. If you have the klayout python standalone, that is what you will get as "pya". Then, its layout database features will be available, just like the regular GSI version of `pya`.
+however, of course, you then cannot try to use the GUI features of `pya`.
+
+If you have the klayout python standalone, that is what you will get as "pya". Then, its layout database features will be available, just like the regular GSI version of `pya`.
 
 ## Markup reading
 This will, in the future, expand into technology component access, which are just XML files. Outside of GSI, `pya.Technology` breaks, and `klayout.db.Technology` has not loaded the technology list.

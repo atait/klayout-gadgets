@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <klayout-macro>
- <description>lygadgets self-install</description>
+ <description>lygadgets selfinstall</description>
  <version/>
  <category>pymacros</category>
  <prolog/>
@@ -26,6 +26,22 @@ pypackage_name = 'lygadgets'
 lypackage_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 import lygadgets
 lygadgets.export_to_system(pypackage_name, lypackage_dir)
+
+menu = pya.Application.instance().main_window().menu()
+s1 = "tester_menu2"
+if not(menu.is_menu(s1)):
+    menu.insert_menu('help_menu', s1, 'lygadgets success')
+# put something in
+item_str = 'action_item_cray'
+func_str = 'action_function_cray'
+globals()[item_str] = pya.Action()
+def wrapped():
+    pya.MessageBox.info('Message for you', 'HEYO', pya.MessageBox.Ok)
+globals()[func_str] = wrapped
+globals()[item_str].on_triggered = globals()[func_str]
+action = globals()[item_str]
+action.title = 'Heyo >>>'
+menu.insert_item(s1 + '.begin', 'Heyo', action)
 
 </text>
 </klayout-macro>

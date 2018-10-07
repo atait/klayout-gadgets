@@ -1,11 +1,10 @@
 from setuptools import setup
-from setuptools.command.install import install
 
-from lygadgets import post_install_factory
 
 def readme():
     with open('README.md', 'r') as fx:
       return fx.read()
+
 
 setup(name='lygadgets',
       version='0.0.3',
