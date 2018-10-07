@@ -1,3 +1,5 @@
+__version__ = 0.0.2
+
 from .environment import pya, isGUI, isGSI
 from .messaging import message, message_loud
 from .markup import xml_to_dict
