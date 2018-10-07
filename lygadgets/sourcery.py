@@ -29,6 +29,9 @@ def get_system_version():
     try:
         retraw = subprocess.check_output([system_python(), '-c', check_program])
         return retraw.decode().strip("'").strip('\n')
+    except (ImportError, ModuleNotFoundError, subprocess.CalledProcessError):
+        # It's not installed at all
+        return '-1'
     except AttributeError as err:
         err.args = ('The package {} does not define a __version__ in its __init__.py'.format(pypackage), ) + err.args[:1]
         raise
@@ -48,7 +51,7 @@ def get_source_version(pypackage_dir):
 
 
 def install_from_source(source_dir):
-    install_call = [get_system_python(), 'setup.py', 'install']
+    install_call = [system_python(), 'setup.py', 'install']
     try:
         subprocess.check_call(install_call, cwd=source_dir)
         message('Success')
