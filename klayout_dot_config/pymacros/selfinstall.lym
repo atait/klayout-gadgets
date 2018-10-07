@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>lygadgets self-install</description>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>true</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut/>
+ <show-in-menu>false</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text>
+
+import pya
+import os
+
+pya.Application.instance().main_window().message('Initializing lygadgets', 5000)
+
+# Install the python package in the system
+pypackage_name = 'lygadgets'
+lypackage_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+import lygadgets
+lygadgets.export_to_system(pypackage_name, lypackage_dir)
+
+</text>
+</klayout-macro>

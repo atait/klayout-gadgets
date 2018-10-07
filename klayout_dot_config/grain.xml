@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<salt-grain>
+ <name>lygadgets</name>
+ <version>0.0.1</version>
+ <api-version>0.1</api-version>
+ <title>lygadgets</title>
+ <doc>Tools to make klayout and python work better together</doc>
+ <doc-url>https://github.com/atait/klayout-ipc/blob/master/README.md</doc-url>
+ <url>https://github.com/atait/klayout-gadgets.git/trunk/klayout_dot_config</url>
+ <author>Alex Tait</author>
+ <author-contact>GitHub: atait, Email: alexander.tait@nist.gov</author-contact>
+ <!-- <icon></icon> -->
+ <license>MIT</license>
+ <depends>
+  <name>Python_packages_for_KLayout</name>
+  <url/>
+  <version>1.0</version>
+ </depends>
+</salt-grain>
