@@ -1,6 +1,6 @@
-from lygadgets.environment import pya
+from lygadgets.environment import pya, isGUI
 
-if environment.isGUI():
+if isGUI():
     main_window = pya.Application.instance().main_window()
     message = lambda msg: main_window.message(msg, 5000)
     message_loud = lambda msg: pya.MessageBox.info('Message for you', msg, pya.MessageBox.Ok)
