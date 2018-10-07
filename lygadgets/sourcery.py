@@ -68,7 +68,7 @@ def install_from_source(source_dir):
         raise
 
 
-def synchronize_package(pypackage_name, lypackage_dir):
+def export_to_system(pypackage_name, lypackage_dir):
     global pypackage
     pypackage = pypackage_name
     pypackage_dir = os.path.join(lypackage_dir, 'python')
