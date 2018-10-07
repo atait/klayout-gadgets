@@ -64,7 +64,9 @@ def install_from_source(source_dir):
         message('Success')
     except Exception as err:
         message_loud(('Error installing {}!\n\n{}\n\n'.format(pypackage, err) +
-                      'Get the traceback by launching klayout from command line'))
+                      'Get the traceback by launching klayout from command line (verified)'))
+        import traceback
+        message_loud(traceback.extract_stack())
         raise
 
 

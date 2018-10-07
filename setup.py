@@ -8,7 +8,7 @@ def readme():
       return fx.read()
 
 setup(name='lygadgets',
-      version='0.0.1',
+      version='0.0.2',
       description='Tools to make klayout and python work better together',
       long_description=readme(),
       author='Alex Tait',
