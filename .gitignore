@@ -1,0 +1,11 @@
+# Bytecode
+__pycache__
+*.py[cod]
+
+# DS stores
+*.DS_Store
+.DS_Store
+
+# Builds
+dist
+build
