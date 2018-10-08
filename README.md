@@ -7,7 +7,7 @@ Tools to make klayout and python work together better.
 
 Specifically, it makes hybrid salt packages (klayout macros and python) easier by auto-installing the python part in *system* python and of course is always visible in the klayout namespace.
 
-This has a special focus on script-based layout of integrated circuits. Scripts that are run within klayout should also run correctly when running without the klayout application. Eventually, this should make transitioning to the klayout python standalone more smooth.
+This has a special focus on script-based layout of integrated circuits. Scripts that are run within klayout should also run correctly when running without the klayout application. Eventually, this should make transitioning to the klayout python standalone smoother.
 
 ### Here are the rules for this package
 
@@ -62,12 +62,31 @@ Here is what you must do
 ln -s /usr/local/bin/python3 /usr/local/bin/python
 ```
 
+Maybe you don't have "python3" (another symlink) there?! A more involved but foolproof way is to actually go to your terminal and see where it leads. Here is an example that will differ for you in terms of paths and numbers
+
+```bash
+$ python
+Python 3.7.0 (default, Jun 29 2018, 20:13:13) 
+[Clang 9.1.0 (clang-902.0.39.2)] on darwin
+Type "help", "copyright", "credits" or "license" for more information.
+
+>>> import sys
+>>> sys.executable
+'/usr/local/opt/python/bin/python3.7'
+```
+
+Exit the python interpreter and then do
+
+```bash
+ln -s /usr/local/opt/python/bin/python3.7 /usr/local/bin/python
+```
+
 Here is what you cannot do
 
 - `alias python=python3`
 - not have python 3 installed somewhere
-- use Anaconda
-- use pyenv (I think this would be ok, but not tested)
+- use Anaconda (I think this would be ok, *as long as* `/usr/local/bin/python` *is symlinked to the appropriate place*)
+- use pyenv (Also think this would be fine, but not tested)
 - use Windows
 
 ### From a python component
