@@ -51,6 +51,25 @@ Using system python, an import mylylib is run. Then it asserts the version is ri
 
 If this causes an error, it uses system python to run setup.py for mylylib.
 
+#### Caveat
+The GSI python is different than the system python. It has all of the builtin packages installed in a Framework located within the klayout.app. This means it is extremely difficult to figure out what happens when you call "python" from your command line or as a regular user of some other application (which ultimately does the same thing).
+
+This has led to a requirement. You have to symlink it somewhere in `/usr/local/bin`, `/usr/local/python`, or `/usr/local/opt`. These are pretty common places to install "python", which is really a symlink leading to `/usr/local/.../Frameworks/.../python3.6.5` or `/usr/.../Cellar/python/3.6.5/bin/python3.6.5` if you are a brew user.
+
+Here is what you must do
+
+```bash
+ln -s /usr/local/bin/python3 /usr/local/bin/python
+```
+
+Here is what you cannot do
+
+- `alias python=python3`
+- not have python 3 installed somewhere
+- use Anaconda
+- use pyenv (I think this would be ok, but not tested)
+- use Windows
+
 ### From a python component
 
 - Currently: finds enclosing klayout_dot_config and makes a symlink
