@@ -1,5 +1,7 @@
 # klayout-gadgets
-**This is a prototype still in progress**
+**This is a prototype still in progress.**
+
+**It has been tested on MacOS HighSierra and is expected to work on other distributions of MacOS and Linux with python 3 and klayout >= 0.25.3. No windows yet.**
 
 Tools to make klayout and python work together better.
 
@@ -66,7 +68,7 @@ Maybe you don't have "python3" (another symlink) there?! A more involved but foo
 
 ```bash
 $ python
-Python 3.7.0 (default, Jun 29 2018, 20:13:13) 
+Python 3.7.0 (default, Jun 29 2018, 20:13:13)
 [Clang 9.1.0 (clang-902.0.39.2)] on darwin
 Type "help", "copyright", "credits" or "license" for more information.
 

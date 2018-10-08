@@ -1,4 +1,4 @@
-__version__ = '0.0.2'
+__version__ = '0.0.4'
 
 from .environment import pya, isGUI, isGSI
 from .messaging import message, message_loud
