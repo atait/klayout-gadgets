@@ -3,6 +3,7 @@ try:
 except ImportError:
     raise ImportError('you need lygadgets installed to do this demo')
 
+
 try:
     import lyfoo
     print('lyfoo ({}) installed'.format(lyfoo.__version__))
@@ -14,6 +15,7 @@ try:
     print('lybar ({}) installed'.format(lybar.__version__))
 except ImportError:
     print('lybar not found in system')
+
 
 try:
     from lybar import use_lyfoo

@@ -18,6 +18,12 @@ import os
 
 pya.Application.instance().main_window().message('Initializing lypy_hybrid', 5000)
 
+# Make the menu
+menu = pya.Application.instance().main_window().menu()
+if not(menu.is_menu('lygadget_demo')):
+    menu.insert_menu('help_menu', 'lygadget_demo', 'SOEN PDK')
+
+
 # # Attempt to install the python package in the system
 # pypackage_name = 'lybar'
 # lypackage_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))

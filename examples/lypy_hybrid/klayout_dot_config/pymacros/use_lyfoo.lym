@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>Use lyfoo via lybar</description>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut/>
+ <show-in-menu>true</show-in-menu>
+ <menu-path>lygadget_demo.end</menu-path>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text>
+
+from lygadgets import message_loud
+from lybar import use_lyfoo
+
+message_loud('lybar says 1+1 is {}.'.format(use_lyfoo()))
+
+ </text>
+</klayout-macro>

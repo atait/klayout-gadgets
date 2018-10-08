@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <klayout-macro>
- <description>lypy_hybrid initialization</description>
+ <description>Export lybar to system</description>
  <category>pymacros</category>
  <prolog/>
  <epilog/>
