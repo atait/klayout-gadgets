@@ -18,7 +18,11 @@ def get_klayout_version():
 
 
 def system_python():
-    retraw = subprocess.check_output(['which', 'python'])
+    # Fix the PATH to prioritize /usr/local/bin
+    # This is no longer windows compatible
+    my_env = os.environ.copy()
+    my_env['PATH'] = '/usr/local/bin:' + my_env['PATH']
+    retraw = subprocess.check_output(['which', 'python'], env=my_env)
     return retraw.decode().strip("'").strip('\n')
 
 
