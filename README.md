@@ -3,6 +3,8 @@
 
 Tools to make klayout and python work together better.
 
+![](klayout_dot_config/icons/lygadgets.png?raw=true)
+
 Specifically, it makes hybrid salt packages (klayout macros and python) easier by auto-installing the python part in *system* python and of course is always visible in the klayout namespace.
 
 This has a special focus on script-based layout of integrated circuits. Scripts that are run within klayout should also run correctly when running without the klayout application. Eventually, this should make transitioning to the klayout python standalone more smooth.
