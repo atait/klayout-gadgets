@@ -1,15 +1,25 @@
 ## There are 3 packages
 lypy_hybrid (klayout), lybar (within lypy_hybrid), lyfoo (pure python)
 
-When you run setup.py in either python package, they will be installed in the system (that's the point), and transferred to the klayout namespace.
+lypy_hybrid defines menu buttons. lyfoo is used just for utility functions. lybar does a combination of things: uses lyfoo, uses the GUI elements of pya. It also acesses non-GUI elements of pya. This case is most relevant to script-based layout from the command-line.
 
-When you install lypy_hybrid through salt, or if you open klayout, lybar will be exported to the system.
 
-## Tests
-lypy_hybrid gives you two menu buttons. One checks for a successful call passing through lybar and lyfoo. Another performs the lybar export to system. This is usually done automatically, but is made manual here for illustration.
+## Installation/uninstallation behavior
+When you run `python setup.py install` in either python package, they will be installed in the system (that's the point), and transferred to the klayout namespace. Note: linking will NOT work if you do `pip install .` because it restricts post-install behavior.
+
+lypy_hybrid does not automatically export lybar to the system. You have to press a button to see what would happen normally.
+
+To emulate the effect of having something in klayout but not system, run setup.py and then, `source clean_system.sh`. For the reverse, do `source clean_klayout.sh`. This doesn't yet detect windows.
+
+## Testers
+lypy_hybrid gives you three GUI menu buttons. One checks for a successful call passing through lybar and lyfoo. Another does an explicit GUI thing via lybar. Another performs the lybar export to system. This is usually done automatically, but is made manual here for illustration.
+
+There is also a test script to report system status. It can be run with `python status.py` or `klayout -r status.py`.
+
+
+## Try it
+This is your test flow: run setup.py in both. Then clean out either klayout or system or neither. Then run the tests to your liking.
+
+Interesting excercise: clean the system, open klayout. Try running status.py as *both* python and klayout -r. Then, in the klayout menu, press "export lybar". Try the status calls again.
 
 Does it work the same when klayout.app is launched from Dock vs. command-line?
-
-Case 1: lyfoo not linked. Press the button. It should fail.
-
-Case 2: lyfoo
