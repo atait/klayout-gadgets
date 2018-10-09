@@ -76,6 +76,7 @@ def attempt_symlink(source, dest, overwrite=False):
             return None
         else:
             # remove
+            return None
     if not is_windows():
         os.symlink(source, dest)
     else:
