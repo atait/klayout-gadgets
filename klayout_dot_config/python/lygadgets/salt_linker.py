@@ -2,6 +2,7 @@ import os
 from sys import platform
 import subprocess
 from setuptools.command.install import install
+from importlib import import_module
 
 from lygadgets.markup import xml_to_dict
 
@@ -84,6 +85,35 @@ def attempt_symlink(source, dest, overwrite=False):
     return dest
 
 
+def validate_is_lypackage(lypackage_prospective):
+    ''' Raises an error with a description if this directory does
+        not match the format of a klayout salt package.
+
+        It must have a grain.xml that defines name and NO __init__.py
+    '''
+    fullpath = os.path.realpath(lypackage_prospective)
+    try:
+        with open(os.path.join(fullpath, 'grain.xml')) as grain:
+            registered_name = xml_to_dict(grain.read())['salt-grain']['name']
+    except FileNotFoundError as err:
+        err.args = ((lypackage_prospective +
+                     ' does not appear to be a klayout package.' +
+                     'It must have a grain.xml file.\n' +
+                     err.args[0]), ) + err.args[1:]
+        raise
+    except KeyError as err:
+        raise FileNotFoundError((lypackage_prospective +
+                                 ' : grain.xml does not define a "name" property.'))
+    # Make sure not also a pypackage. That would be incorrect
+    try:
+        validate_is_pypackage(fullpath)
+    except:
+        pass
+    else:
+        raise FileNotFoundError((lypackage_prospective +
+                                 ' : cannot have a grain.xml AND an __init__.py'))
+
+
 def link_to_salt(lypackage_dir):
     '''
         Attempts to link the lypackage_dir into salt.
@@ -93,22 +123,50 @@ def link_to_salt(lypackage_dir):
         os.mkdir(salt_dir)
 
     # Determine the lypackage name from the grain.xml
+    validate_is_lypackage(lypackage_dir)
     with open(os.path.join(lypackage_dir, 'grain.xml')) as grain:
         registered_name = xml_to_dict(grain.read())['salt-grain']['name']
+
     salt_link = os.path.join(salt_dir, registered_name)
 
     # Make the symlink
     return attempt_symlink(lypackage_dir, salt_link, overwrite=False)
 
 
+def validate_is_pypackage(package_prospective):
+    ''' Raises an error with a description if this directory does
+        not match the format of a python package
+
+        It must have __init__.py and NO grain.xml
+
+        Also accepts module files ending with .py
+    '''
+    if os.path.isfile(package_prospective):
+        if os.path.splitext(package_prospective)[1] != '.py':
+            raise FileNotFoundError(package_prospective + ' not a python file')
+        else:
+            return
+
+    if not os.path.exists(os.path.join(package_prospective, '__init__.py')):
+        raise FileNotFoundError(package_prospective + ' does not appear to be a python package.')
+    # Make sure not also a lypackage. That would be incorrect
+    try:
+        validate_is_lypackage(package_prospective)
+    except:
+        pass
+    else:
+        raise FileNotFoundError(package_prospective + ' cannot have a grain.xml AND an __init__.py')
+
+
 def link_to_user_python(package_dir):
     '''
         Attempts to link the package_dir into klayout's standalone python directory.
     '''
+    validate_is_pypackage(package_dir)
     python_dir = os.path.join(klayout_home(), 'python')
     if not os.path.exists(python_dir):
         os.mkdir(python_dir)
-    package_name = os.path.basename(package_dir)
+    package_name = os.path.splitext(os.path.basename(package_dir))[0]
     link = os.path.join(python_dir, package_name)
     return attempt_symlink(package_dir, link, overwrite=False)
 
