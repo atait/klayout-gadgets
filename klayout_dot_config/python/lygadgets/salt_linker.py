@@ -1,33 +1,10 @@
 import os
-from sys import platform
 import subprocess
 from setuptools.command.install import install
 from importlib import import_module
 
 from lygadgets.markup import xml_to_dict
-
-
-def is_windows():
-    if platform == "linux" or platform == "linux2":
-        return False
-    elif platform == "darwin":
-        return False
-    elif platform == "win32":
-        return True
-    else:
-        raise ValueError('Unrecognized operating system: {}'.format(platform))
-
-
-def klayout_home():
-    ''' Figure out the klayout configuration directory.
-        Uses exactly the same logic as used in the klayout source.
-    '''
-    ly_home = os.environ.get('KLAYOUT_HOME', '')
-    if ly_home == '':
-        ly_home = os.path.join(os.path.expanduser('~'), 'KLayout' if is_windows() else '.klayout')
-    if not os.path.exists(ly_home):
-        raise FileNotFoundError('The KLayout config directory was not found. KLayout might not be installed.')
-    return ly_home
+from lygadgets.environment import klayout_home, is_windows
 
 
 def symlink_windows(source, destination):

@@ -1,3 +1,6 @@
+import os
+from sys import platform
+
 
 def isGSI():
     ''' Detect whether we are in klayout's generic scripting interface
@@ -23,6 +26,29 @@ def isGUI():
         if main is not None:
             return True
     return False
+
+
+def klayout_home():
+    ''' Figure out the klayout configuration directory.
+        Uses exactly the same logic as used in the klayout source.
+    '''
+    ly_home = os.environ.get('KLAYOUT_HOME', '')
+    if ly_home == '':
+        ly_home = os.path.join(os.path.expanduser('~'), 'KLayout' if is_windows() else '.klayout')
+    if not os.path.exists(ly_home):
+        raise FileNotFoundError('The KLayout config directory was not found. KLayout might not be installed.')
+    return ly_home
+
+
+def is_windows():
+    if platform == "linux" or platform == "linux2":
+        return False
+    elif platform == "darwin":
+        return False
+    elif platform == "win32":
+        return True
+    else:
+        raise ValueError('Unrecognized operating system: {}'.format(platform))
 
 
 # determine what we will use for pya
