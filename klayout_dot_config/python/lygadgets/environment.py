@@ -10,12 +10,17 @@ def isGSI():
         return False
 
 
-def isGUI():
-    ''' Klayout can run as a window or in batch mode on command line
+def isGUI(preinitialization=False):
+    ''' Klayout can run as a window or in batch mode on command line.
+        If it launches in batch (-b) or database-only (-zz) mode, then main_window is None.
+
+        If however it runs in non-GUI mode (-z), it is not None; however,
+        it has not been given a title yet. (see layApplication.cc)
     '''
     if isGSI():
         import pya
-        if pya.Application.instance().main_window() is not None:
+        main = pya.Application.instance().main_window()
+        if preinitialization or (main is not None and main.windowTitle != ''):
             return True
     return False
 
