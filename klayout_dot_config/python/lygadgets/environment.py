@@ -10,7 +10,7 @@ def isGSI():
         return False
 
 
-def isGUI(preinitialization=False):
+def isGUI():
     ''' Klayout can run as a window or in batch mode on command line.
         If it launches in batch (-b) or database-only (-zz) mode, then main_window is None.
 
