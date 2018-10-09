@@ -181,18 +181,26 @@ def link_any(any_source):
     raise FileNotFoundError(any_source + ' is neither a klayout salt package nor a python module/package.')
 
 
-def postinstall_factory(source, linker_function):
+def postinstall_hook(source):
     ''' Generates a class that subclasses install.
         It attempts to link the lypackage_dir into salt.
+
         It can be run by setup.py with the argument::
 
             cmdclass={'install': post_install_factory(some_directory)},
+
+        If you use pip, this sript will be blocked. So this method is no longer recommended.
+        Instead, inform the user that they should run
+
+            lygadgets_link yourpackage
+
+        on the command line, after installing via pip
     '''
     class PostInstall(install):
         def run(self):
             install.run(self)
             try:
-                the_link = linker_function(source)
+                the_link = link_any(source)
                 if the_link is not None:
                     print('\nAutoinstall into klayout succeeded!\n{}\n'.format(the_link))
                 else:
@@ -202,12 +210,3 @@ def postinstall_factory(source, linker_function):
                 print(err)
                 print('\nYou must perform a manual install as described in a README.')
     return PostInstall
-
-
-def postinstall_lypackage(lypackage_dir):
-    return postinstall_factory(lypackage_dir, link_to_salt)
-
-
-def postinstall_pure(package_dir):
-    return postinstall_factory(package_dir, link_to_user_python)
-
