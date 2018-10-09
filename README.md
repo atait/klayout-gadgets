@@ -223,3 +223,5 @@ If `setup.py install` is used, no problem. This is more likely to be the method 
 
 
 #### Author: Alex Tait, October 2018
+#### National Institute of Standards and Technology, Boulder, CO, USA
+
