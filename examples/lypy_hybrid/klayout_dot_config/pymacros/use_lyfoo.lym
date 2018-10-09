@@ -13,10 +13,9 @@
  <dsl-interpreter-name/>
  <text>
 
-from lygadgets import message_loud
 from lybar import use_lyfoo
 
-message_loud('lybar says 1+1 is {}.'.format(use_lyfoo()))
+use_lyfoo()
 
  </text>
 </klayout-macro>

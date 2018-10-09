@@ -1,2 +1,2 @@
-pip uninstall soen
-pip uninstall mylylib
+pip uninstall lyfoo
+pip uninstall lybar

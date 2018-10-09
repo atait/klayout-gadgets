@@ -21,7 +21,7 @@ pya.Application.instance().main_window().message('Initializing lypy_hybrid', 500
 # Make the menu
 menu = pya.Application.instance().main_window().menu()
 if not(menu.is_menu('lygadget_demo')):
-    menu.insert_menu('help_menu', 'lygadget_demo', 'SOEN PDK')
+    menu.insert_menu('help_menu', 'lygadget_demo', 'lygadget Demo')
 
 
 # # Attempt to install the python package in the system

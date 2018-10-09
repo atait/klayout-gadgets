@@ -24,9 +24,8 @@ except:
     print('lybar failed to use lyfoo')
 
 try:
-    from lybar import get_techs
-    print('lybar says these technologies are installed')
-    print(get_techs())
+    from lybar import get_technologies
+    print('lybar says these technologies are installed' + str(get_technologies()))
 except:
     print('lybar cannot get technologies')
 

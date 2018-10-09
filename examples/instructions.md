@@ -27,3 +27,21 @@ This is your test flow: run setup.py in both. Then clean out either klayout or s
 Interesting excercise: clean the system, open klayout. Try running status.py as *both* python and klayout -r. Then, in the klayout menu, press "export lybar". Try the status calls again.
 
 Does it work the same when klayout.app is launched from Dock vs. command-line?
+
+
+## Unexpected
+-z: main not None, so messaging success but not visible
+-zz: main None, lym called = bad
+-b: main None, no .lym called so we are OK
+none: main not None
+
+The crazy thing is that autorun-early precedes window titling
+
+-z: tried to access menu
+-zz: tried to access menu
+-b: main None, no .lym called so we are OK
+none: main not None
+
+isGUI returns true even in -z mode
+isGUI correct in -zz mode, but lyipc tries to access main_window().message
+everything correct in -b mode
