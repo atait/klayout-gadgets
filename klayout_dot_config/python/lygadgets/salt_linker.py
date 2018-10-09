@@ -171,6 +171,37 @@ def link_to_user_python(package_dir):
     return attempt_symlink(package_dir, link, overwrite=False)
 
 
+from types import ModuleType
+def link_installed_python(module):
+    if type(module) is str:
+        module = import_module(module)
+    elif type(module) is not ModuleType:
+        raise TypeError(module + ' must be either string or ModuleType')
+    source_dir = module.__path__[0]
+    return link_to_user_python(source_dir)
+
+
+def link_any(any_source):
+    ''' Directories take precedence over installed python module
+    '''
+    # Check this first because we can only call exists on strings
+    if type(any_source) is ModuleType:
+        return link_installed_python(any_source)
+
+    if os.path.exists(any_source):
+        try:
+            return link_to_salt(any_source)
+        except: pass
+        try:
+            return link_to_user_python(any_source)
+        except: pass
+    else:
+        try:
+            return link_installed_python(any_source)
+        except: pass
+    raise FileNotFoundError(any_source + ' is neither a klayout salt package nor a python module/package.')
+
+
 def postinstall_factory(source, linker_function):
     ''' Generates a class that subclasses install.
         It attempts to link the lypackage_dir into salt.
