@@ -78,7 +78,7 @@ def validate_is_lypackage(lypackage_prospective):
         err.args = ((lypackage_prospective +
                      ' does not appear to be a klayout package.' +
                      'It must have a grain.xml file.\n' +
-                     err.args[0]), ) + err.args[1:]
+                     str(err.args[0])), ) + err.args[1:]
         raise
     except KeyError as err:
         raise FileNotFoundError((lypackage_prospective +
