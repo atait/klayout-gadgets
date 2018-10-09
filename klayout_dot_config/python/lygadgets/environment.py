@@ -20,7 +20,7 @@ def isGUI(preinitialization=False):
     if isGSI():
         import pya
         main = pya.Application.instance().main_window()
-        if preinitialization or (main is not None and main.windowTitle != ''):
+        if main is not None:
             return True
     return False
 
