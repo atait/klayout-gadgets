@@ -44,22 +44,24 @@ def symlink_windows(source, destination):
 
 
 def attempt_symlink(source, dest, overwrite=False):
-    ''' Platform independent. Returns the destination if the link was created, otherwise None
+    ''' Platform independent. Returns the full paths of source and destination if the link was created, otherwise None for both
     '''
+    source = os.path.realpath(source)
+    dest = os.path.realpath(dest)
     if source == dest:
         # Prevent circular reference
-        return None
+        return None, None
     if os.path.exists(dest):
         if not overwrite:
-            return None
+            return None, None
         else:
-            # remove
-            return None
+            # remove TODO. use shutil
+            return None, None
     if not is_windows():
         os.symlink(source, dest)
     else:
         symlink_windows(source, dest)
-    return dest
+    return source, dest
 
 
 def validate_is_lypackage(lypackage_prospective):
@@ -95,14 +97,14 @@ def link_to_salt(lypackage_dir):
     '''
         Attempts to link the lypackage_dir into salt.
     '''
-    salt_dir = os.path.join(klayout_home(), 'salt')
-    if not os.path.exists(salt_dir):
-        os.mkdir(salt_dir)
-
     # Determine the lypackage name from the grain.xml
     validate_is_lypackage(lypackage_dir)
     with open(os.path.join(lypackage_dir, 'grain.xml')) as grain:
         registered_name = xml_to_dict(grain.read())['salt-grain']['name']
+
+    salt_dir = os.path.join(klayout_home(), 'salt')
+    if not os.path.exists(salt_dir):
+        os.mkdir(salt_dir)
 
     salt_link = os.path.join(salt_dir, registered_name)
 
