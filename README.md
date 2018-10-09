@@ -132,22 +132,22 @@ my-git-project
 Put this in your `setup.py`:
 
 ```python
-def my_postinstall():
-    try:
-        from lygadgets import post_install_factory
-    except (ImportError, ModuleNotFoundError):
-        print('\033[95mlygadgets not found, so klayout package not linked.')
-        print('Please download it in the klayout Package Manager\033[0m')
-        return dict()
-    else:
-        lypackage_root = os.path.realpath(os.path.join('..', '..', 'klayout_dot_config'))
-        return {'install': post_install_factory(lypackage_root)}
+try:
+    from lygadgets import postinstall_lypackage
+except (ImportError, ModuleNotFoundError):
+    print('\033[95mlygadgets not found, so klayout package not linked.')
+    print('Please download it in the klayout Package Manager\033[0m')
+    my_postinstall = dict()
+else:
+    setup_dir = os.path.dirname(os.path.realpath(__file__))
+    lypackage_dir = os.path.dirname(setup_dir)
+    my_postinstall = {'install': postinstall_lypackage(lypackage_dir)}
 
 ...
 
 setup(
       ...
-      cmdclass=my_postinstall(),
+      cmdclass=my_postinstall,
       ...
       )
 ```
@@ -165,9 +165,9 @@ but this will never break:
 from lygadgets import pya
 ```
 
-however, of course, you then cannot try to use the GUI features of `pya`.
+however, of course, you then cannot try to use the GUI features of `pya`. You can't use it at all if you are running system python.
 
-If you have the klayout python standalone, that is what you will get as "pya". Then, its layout database features will be available, just like the regular GSI version of `pya`.
+However, if you have the klayout python standalone, that is what you will get as "pya". Then, its layout database features will be available, just like the regular GSI version of `pya` in batch mode.
 
 ## Markup reading
 This will, in the future, expand into technology component access, which are just XML files. Outside of GSI, `pya.Technology` breaks, and `klayout.db.Technology` has not loaded the technology list.
