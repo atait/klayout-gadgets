@@ -9,7 +9,7 @@ parser = argparse.ArgumentParser(description="lygadgets linkers between klayout 
 parser.add_argument('sourcepackage', type=str,
                     help='the package to link. Can be a salt directory or a python directory, or the name of an installed python package')
 parser.add_argument('-f', '--force', action='store_true',
-                    help='(NOT functional in v0.0.7) overwrite anything present at the destination with the same name')
+                    help='(NOT functional in v0.0.8) overwrite anything present at the destination with the same name')
 parser.add_argument('-v', '--version', action='version', version=f'%(prog)s v{__version__}')
 
 
