@@ -1,9 +1,6 @@
 # klayout-gadgets
-**This is a prototype still in progress.**
 
-**It has been tested on MacOS HighSierra and is expected to work on other distributions of MacOS and Linux with python 3 and klayout >= 0.25.3. No windows yet.**
-
-Tools to make klayout and python work better together, with a special focus on script-based layout of integrated circuits. There are some python-driven scripters and others that use the klayout language. Both can use tools to get certain simple information about klayout. The problem is that their environments and even execution engines are extremely different.
+Tools to make klayout and python work better together, with a focus on script-based layout of integrated circuits. There are some python-driven scripters and others that use the klayout language. Both can use tools to get certain simple information about klayout. The problem is that their environments and even execution engines are extremely different.
 
 The purpose of this package is to provide simple klayout-related tools in a way that is highly robust to the environment in which it is being interpreted.
 
@@ -12,7 +9,6 @@ The purpose of this package is to provide simple klayout-related tools in a way 
 
 ![](klayout_dot_config/icons/lygadgets.png?raw=true)
 
-Specifically, it makes hybrid salt packages (klayout macros and python) easier by auto-installing the python part in *system* python and of course is always visible in the klayout namespace.
 
 ## Installation
 
@@ -101,6 +97,9 @@ Also includes the `yaml` package, so you can just `import yaml` within the GSI.
 These are technical notes, worth understanding if you are developing new klayout packages with hybrid GSI/system aspects.
 
 **If you are a user, all you need to know is that `lygadgets_link` does what you need**
+
+NB: This package so far tested on MacOS HighSierra and is expected to work on other distributions of MacOS and Linux with python 3 and klayout >= 0.25.3. Windows supports python > klayout linking, but not klayout > system.
+
 
 ### Type 1: From klayout to system
 This looks in the package directory and does setup.py for the python package. Every time the application opens
@@ -222,3 +221,5 @@ Note this code *will not run* if `pip install`, and all your users have to do `l
 
 If `setup.py install` is used, no problem. This is more likely to be the method of installation when users install from source in a git project.
 
+
+#### Author: Alex Tait, October 2018

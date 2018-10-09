@@ -3,7 +3,8 @@ import subprocess
 import importlib.util
 from importlib import import_module
 
-from lygadgets import message, message_loud
+from lygadgets.messaging import message, message_loud
+from lygadgets.environment import is_windows
 
 pypackage = None
 
@@ -19,6 +20,13 @@ def get_klayout_version():
 
 _system_python = None
 def system_python():
+    ''' Fix the PATH to prioritize /usr/local/bin
+
+        This is no longer windows compatible.
+        If we are running in windows, it always raises a
+    '''
+    if is_windows():
+        raise RuntimeError('finding system_python on Windows not supported.')
     global _system_python
     if _system_python is None:
         # Fix the PATH to prioritize /usr/local/bin
@@ -83,12 +91,12 @@ def get_system_version():
         all_talking = retraw.decode().strip("'").strip('\n')
         printed_lines = all_talking.split('\n')
         return printed_lines[-1]
-    except (ImportError, ModuleNotFoundError, subprocess.CalledProcessError):
-        # It's not installed at all
-        return '-1'
     except AttributeError as err:
         err.args = ('The package {} does not define a __version__ in its __init__.py'.format(pypackage), ) + err.args[:1]
         raise
+    except (ImportError, ModuleNotFoundError, subprocess.CalledProcessError, RuntimeError):
+        # It's not installed at all
+        return '-1'
 
 
 # Source version

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <salt-grain>
  <name>lygadgets</name>
- <version>0.0.6</version>
+ <version>0.0.7</version>
  <api-version>0.1</api-version>
  <title>lygadgets</title>
  <doc>Tools to make klayout and python work better together</doc>
