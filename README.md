@@ -222,6 +222,6 @@ Note this code *will not run* if `pip install`, and all your users have to do `l
 If `setup.py install` is used, no problem. This is more likely to be the method of installation when users install from source in a git project.
 
 
-#### Author: Alex Tait, October 2018
+#### Authors: Alex Tait, Adam McCaughan, Sonia Buckley, Jeff Chiles, Jeff Shainline, Rich Mirin, Sae Woo Nam
 #### National Institute of Standards and Technology, Boulder, CO, USA
 

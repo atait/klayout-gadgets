@@ -1,5 +1,5 @@
 ## There are 3 packages
-lypy_hybrid (klayout), lybar (within lypy_hybrid), lyfoo (pure python)
+lypy_hybrid (klayout), lybar (python within lypy_hybrid), lyfoo (pure python)
 
 lypy_hybrid defines menu buttons. lyfoo is used just for utility functions. lybar does a combination of things: uses lyfoo, uses the GUI elements of pya. It also acesses non-GUI elements of pya. This case is most relevant to script-based layout from the command-line.
 

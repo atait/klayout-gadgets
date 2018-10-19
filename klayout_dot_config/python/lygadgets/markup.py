@@ -3,6 +3,7 @@ from xml.etree import cElementTree as ET
 
 # XML to Dict parser, from:
 # https://stackoverflow.com/questions/2148119/how-to-convert-an-xml-string-to-a-dictionary-in-python/10077069
+# Used in SiEPIC-Tools (https://github.com/lukasc-ubc/SiEPIC-Tools)
 def etree_to_dict(t):
     d = {t.tag: {} if t.attrib else None}
     children = list(t)

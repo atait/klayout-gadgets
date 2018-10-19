@@ -1,0 +1,10 @@
+language: python
+deploy:
+  provider: pypi
+  user: atait
+  password:
+    secure: alA/VERi2j9a8Chr65e44Cc8uXbNZ0kRfZVXnqh/6iHpwCYN+e4AdQCsCFmbO7nNcxtDl4c16ZP0armKdbhrUlXA+cDyHL4B6API9YGg2VTTvmax7gu5xBD1nlnesziXir8YsGMkAr7wBrwlNuDTeG+l9+2S5dOxho3qz4fsNN8h+YzMBu1kzZfTYFxsTI9Zdrd99mXCmW7nr3rN/1TP3hf5O9H373c+etAiKlPfeC7J1+T4jVBieSuU/tfYaWHYMwcdKsWqK1d0QzA5YAh6HQW5dB6TAPQmrMalU2Ffn3isUPPUvb1UHJfn5i2FtELaNFqaz16gbFJ6i8+U4YxV/QrhhtM+Ho2tB+AyTVSNIepvgEQqGJfI314eOrTuvX3wbvY5NkgB83iV9nMBfsIJpsCK0+ZlPDYP71rkPDmBrAJxm3uQyeIikL/jgakvN1Je5rXnZgdHVSJn/YKSmWw7faXRPR3j0B6IN5kIHDwkGVXOZfXUaTVkwYoOY2KCydq2YzcCBZtGu3M7ojg3zGXfCtpJ2VwRs6Gedq8bzluZYx9OMbz5HioOOBOPxfbHNZzxa28e0gTB3KvnI/bEMZclWuJ0AxAT3A1XV/voCRp+2Th1lQPqlBjQdXKovssd8WsQWIz7r09D28EbMRyp311CisQhbE3HdNYDB3kqDL+sOB8=
+  distributions: "sdist bdist_wheel"
+  on:
+    tags: true
+    branch: master
