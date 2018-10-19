@@ -1,4 +1,12 @@
 language: python
+python:
+- '3.6'
+install:
+- python --version
+- echo $TRAVIS_BRANCH
+- pip install klayout_dot_config/python
+script:
+- source tests/test.sh
 deploy:
   provider: pypi
   user: atait
