@@ -19,7 +19,7 @@ def cm_link_any():
     args = parser.parse_args()
     the_links = link_any(args.sourcepackage, overwrite=args.force, hard_copy=args.copy)
     if the_links[0] is None:
-        print('No link made. Destination already has something there.')
+        print('No link made. Destination already has a non-symlink item present.')
         print('Use -f if you would like to overwrite')
     else:
         print('Successfully created a {}'.format('hard copy' if args.copy else 'symbolic link'))

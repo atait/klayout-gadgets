@@ -144,6 +144,7 @@ def link_any(any_source, overwrite=False, hard_copy=False):
         Returns the full paths of source and destination if the link was created, otherwise None for both
 
     '''
+    any_source = os.path.realpath(any_source)
     src = srcdir_from_any(any_source)
     dest = dest_from_srcdir(src)
 
