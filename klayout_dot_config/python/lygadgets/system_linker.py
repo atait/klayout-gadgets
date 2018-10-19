@@ -1,3 +1,9 @@
+from __future__ import print_function
+try:  # python 2 does not have FileNotFoundError. Check it
+    FileNotFoundError
+except NameError:
+    FileNotFoundError = IOError
+
 import os
 import subprocess
 from importlib import import_module
