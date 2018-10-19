@@ -2,6 +2,8 @@ import os
 import subprocess
 from setuptools.command.install import install
 from importlib import import_module
+from shutil import rmtree, copytree
+from types import ModuleType
 
 from lygadgets.markup import xml_to_dict
 from lygadgets.environment import klayout_home, is_windows
@@ -43,185 +45,128 @@ def symlink_windows(source, destination):
     raise WindowsError('Failed to find a way to link to a file in windows')
 
 
-def attempt_symlink(source, dest, overwrite=False):
-    ''' Platform independent. Returns the full paths of source and destination if the link was created, otherwise None for both
-    '''
-    source = os.path.realpath(source)
-    dest = os.path.realpath(dest)
-    if source == dest:
-        # Prevent circular reference
-        return None, None
-    if os.path.exists(dest):
-        if not overwrite:
-            return None, None
-        else:
-            # remove TODO. use shutil
-            return None, None
-    if not is_windows():
-        os.symlink(source, dest)
-    else:
-        symlink_windows(source, dest)
-    return source, dest
-
-
-def validate_is_lypackage(lypackage_prospective):
-    ''' Raises an error with a description if this directory does
-        not match the format of a klayout salt package.
-
-        It must have a grain.xml that defines name and NO __init__.py
-    '''
-    fullpath = os.path.realpath(lypackage_prospective)
+def lypackage_name(source):
     try:
-        with open(os.path.join(fullpath, 'grain.xml')) as grain:
-            registered_name = xml_to_dict(grain.read())['salt-grain']['name']
+        with open(os.path.join(source, 'grain.xml')) as grain:
+            return xml_to_dict(grain.read())['salt-grain']['name']
     except FileNotFoundError as err:
-        err.args = ((lypackage_prospective +
+        err.args = ((source +
                      ' does not appear to be a klayout package.' +
                      'It must have a grain.xml file.\n' +
                      str(err.args[0])), ) + err.args[1:]
         raise
     except KeyError as err:
-        raise FileNotFoundError((lypackage_prospective +
+        raise FileNotFoundError((source +
                                  ' : grain.xml does not define a "name" property.'))
-    # Make sure not also a pypackage. That would be incorrect
+
+
+def is_lypackage(source):
+    if not os.path.isdir(source):
+        return False
     try:
-        validate_is_pypackage(fullpath)
-    except:
-        pass
-    else:
-        raise FileNotFoundError((lypackage_prospective +
-                                 ' : cannot have a grain.xml AND an __init__.py'))
+        lypackage_name(source)
+        return True
+    except (FileNotFoundError, KeyError):
+        return False
 
 
-def link_to_salt(lypackage_dir):
-    '''
-        Attempts to link the lypackage_dir into salt.
-    '''
-    # Determine the lypackage name from the grain.xml
-    validate_is_lypackage(lypackage_dir)
-    with open(os.path.join(lypackage_dir, 'grain.xml')) as grain:
-        registered_name = xml_to_dict(grain.read())['salt-grain']['name']
-
-    salt_dir = os.path.join(klayout_home(), 'salt')
-    if not os.path.exists(salt_dir):
-        os.mkdir(salt_dir)
-
-    salt_link = os.path.join(salt_dir, registered_name)
-
-    # Make the symlink
-    return attempt_symlink(lypackage_dir, salt_link, overwrite=False)
+def is_pypackage(source):
+    if not os.path.isdir(source):
+        return False
+    return os.path.exists(os.path.join(source, '__init__.py'))
 
 
-def validate_is_pypackage(package_prospective):
-    ''' Raises an error with a description if this directory does
-        not match the format of a python package
-
-        It must have __init__.py and NO grain.xml
-
-        Also accepts module files ending with .py
-    '''
-    if os.path.isfile(package_prospective):
-        if os.path.splitext(package_prospective)[1] != '.py':
-            raise FileNotFoundError(package_prospective + ' not a python file')
-        else:
-            return
-
-    if not os.path.exists(os.path.join(package_prospective, '__init__.py')):
-        raise FileNotFoundError(package_prospective + ' does not appear to be a python package.')
-    # Make sure not also a lypackage. That would be incorrect
-    try:
-        validate_is_lypackage(package_prospective)
-    except:
-        pass
-    else:
-        raise FileNotFoundError(package_prospective + ' cannot have a grain.xml AND an __init__.py')
+def is_pymodule(source):
+    if not os.path.isfile(source):
+        return False
+    return os.path.splitext(source)[1] == '.py'
 
 
-def link_to_user_python(package_dir):
-    '''
-        Attempts to link the package_dir into klayout's standalone python directory.
-    '''
-    validate_is_pypackage(package_dir)
-    python_dir = os.path.join(klayout_home(), 'python')
-    if not os.path.exists(python_dir):
-        os.mkdir(python_dir)
-    package_name = os.path.splitext(os.path.basename(package_dir))[0]
-    link = os.path.join(python_dir, package_name)
-    return attempt_symlink(package_dir, link, overwrite=False)
-
-
-from types import ModuleType
-def link_installed_python(module):
-    if type(module) is str:
-        module = import_module(module)
-    elif type(module) is not ModuleType:
-        raise TypeError(module + ' must be either string or ModuleType')
-    source_dir = module.__path__[0]
-    return link_to_user_python(source_dir)
-
-
-def validate_is_lytech(package_prospective):
-    ''' Raises an error with a description if this directory does
-        not match the format of a klayout technology
-
-        It must have a *.lyt, NO __init__.py, and NO grain.xml
-    '''
-    for file_obj in os.listdir(package_prospective):
+def is_lytech(source):
+    for file_obj in os.listdir(source):
         if file_obj.endswith('.lyt'):
-            break
+            return True
     else:
-        raise FileNotFoundError(package_prospective + ' does not appear to be a klayout technology.')
-    # Make sure not also a lypackage. That would be incorrect
+        return False
+
+
+def module_from_str(module):
+    if type(module) is ModuleType:
+        return module
+    elif type(module) is str:
+        return import_module(module)
+    else:
+        raise TypeError('Argument must either be a module or a string')
+
+
+def is_installed_python(module):
     try:
-        validate_is_lypackage(package_prospective)
+        module_from_str(module)
+        return True
     except:
-        pass
+        return False
+
+
+def srcdir_from_any(source):
+    if os.path.exists(source):
+        return source
+    elif is_installed_python(source):
+        module = module_from_str(source)
+        return module.__path__[0]
     else:
-        raise FileNotFoundError(package_prospective + ' cannot have a grain.xml AND an __init__.py')
-   # Make sure not also a pypackage. That would be incorrect
-    try:
-        validate_is_pypackage(fullpath)
-    except:
-        pass
-    else:
-        raise FileNotFoundError((lypackage_prospective +
-                                 ' : cannot have a grain.xml AND an __init__.py'))
-
-def link_to_tech(lytech_dir):
-    '''
-        Attempts to link the lytech_dir into klayout's standalone tech directory.
-    '''
-    validate_is_lytech(lytech_dir)
-    tech_dir = os.path.join(klayout_home(), 'tech')
-    if not os.path.exists(tech_dir):
-        os.mkdir(tech_dir)
-    package_name = os.path.splitext(os.path.basename(lytech_dir))[0]
-    link = os.path.join(tech_dir, package_name)
-    return attempt_symlink(lytech_dir, link, overwrite=False)
+        raise FileNotFoundError('{} does not exist'.format(source))
 
 
-def link_any(any_source):
+def dest_from_srcdir(source):
+    if is_lypackage(source):
+        link_name = lypackage_name(source)
+        link_dir = os.path.join(klayout_home(), 'salt')
+    elif is_pypackage(source) or is_pymodule(source):
+        link_dir = os.path.join(klayout_home(), 'python')
+        link_name = os.path.splitext(os.path.basename(source))[0]
+    elif is_lytech(source):
+        link_dir = os.path.join(klayout_home(), 'tech')
+        link_name = os.path.splitext(os.path.basename(source))[0]
+
+    if not os.path.exists(link_dir):
+        os.mkdir(link_dir)
+    link = os.path.join(link_dir, link_name)
+    return link
+
+
+def link_any(any_source, overwrite=False, hard_copy=False):
     ''' Directories take precedence over installed python module
-    '''
-    # Check this first because we can only call exists on strings
-    if type(any_source) is ModuleType:
-        return link_installed_python(any_source)
 
-    if os.path.exists(any_source):
-        try:
-            return link_to_salt(any_source)
-        except: pass
-        try:
-            return link_to_user_python(any_source)
-        except: pass
-        try:
-            return link_to_tech(any_source)
-        except: pass
+        Platform independent.
+
+        Always overwrites existing symbolic links.
+
+        Returns the full paths of source and destination if the link was created, otherwise None for both
+
+    '''
+    src = srcdir_from_any(any_source)
+    dest = dest_from_srcdir(src)
+
+    if src == dest:
+        # Prevent circular reference
+        return None, None
+    if os.path.islink(dest):
+        os.remove(dest)
+    if os.path.exists(dest):
+        if overwrite:
+            rmtree(dest)
+        else:
+            return None, None
+
+    if hard_copy:
+        copytree(src, dest)
     else:
-        try:
-            return link_installed_python(any_source)
-        except: pass
-    raise FileNotFoundError(any_source + ' is neither a klayout salt package nor a python module/package nor a klayout technology.')
+        if not is_windows():
+            os.symlink(src, dest)
+        else:
+            symlink_windows(src, dest)
+
+    return src, dest
 
 
 def postinstall_hook(source):
