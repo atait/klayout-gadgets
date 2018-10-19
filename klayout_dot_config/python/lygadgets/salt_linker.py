@@ -160,6 +160,46 @@ def link_installed_python(module):
     return link_to_user_python(source_dir)
 
 
+def validate_is_lytech(package_prospective):
+    ''' Raises an error with a description if this directory does
+        not match the format of a klayout technology
+
+        It must have a *.lyt, NO __init__.py, and NO grain.xml
+    '''
+    for file_obj in os.listdir(package_prospective):
+        if file_obj.endswith('.lyt'):
+            break
+    else:
+        raise FileNotFoundError(package_prospective + ' does not appear to be a klayout technology.')
+    # Make sure not also a lypackage. That would be incorrect
+    try:
+        validate_is_lypackage(package_prospective)
+    except:
+        pass
+    else:
+        raise FileNotFoundError(package_prospective + ' cannot have a grain.xml AND an __init__.py')
+   # Make sure not also a pypackage. That would be incorrect
+    try:
+        validate_is_pypackage(fullpath)
+    except:
+        pass
+    else:
+        raise FileNotFoundError((lypackage_prospective +
+                                 ' : cannot have a grain.xml AND an __init__.py'))
+
+def link_to_tech(lytech_dir):
+    '''
+        Attempts to link the lytech_dir into klayout's standalone tech directory.
+    '''
+    validate_is_lytech(lytech_dir)
+    tech_dir = os.path.join(klayout_home(), 'tech')
+    if not os.path.exists(tech_dir):
+        os.mkdir(tech_dir)
+    package_name = os.path.splitext(os.path.basename(lytech_dir))[0]
+    link = os.path.join(tech_dir, package_name)
+    return attempt_symlink(lytech_dir, link, overwrite=False)
+
+
 def link_any(any_source):
     ''' Directories take precedence over installed python module
     '''
@@ -174,11 +214,14 @@ def link_any(any_source):
         try:
             return link_to_user_python(any_source)
         except: pass
+        try:
+            return link_to_tech(any_source)
+        except: pass
     else:
         try:
             return link_installed_python(any_source)
         except: pass
-    raise FileNotFoundError(any_source + ' is neither a klayout salt package nor a python module/package.')
+    raise FileNotFoundError(any_source + ' is neither a klayout salt package nor a python module/package nor a klayout technology.')
 
 
 def postinstall_hook(source):
