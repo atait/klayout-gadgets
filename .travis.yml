@@ -6,7 +6,7 @@ install:
 - echo $TRAVIS_BRANCH
 - pip install klayout_dot_config/python
 script:
-- source tests/test.sh
+- python examples/status.py
 deploy:
   provider: pypi
   user: atait
