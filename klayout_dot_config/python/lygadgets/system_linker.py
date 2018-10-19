@@ -1,6 +1,5 @@
 import os
 import subprocess
-import importlib.util
 from importlib import import_module
 
 from lygadgets.messaging import message, message_loud
@@ -102,14 +101,19 @@ def get_system_version():
 # Source version
 def get_source_version(pypackage_dir):
     version_file = os.path.join(pypackage_dir, pypackage, '__init__.py')
-    spec = importlib.util.spec_from_file_location(pypackage, version_file)
-    source_version_module = importlib.util.module_from_spec(spec)
-    try:
-        spec.loader.exec_module(source_version_module)
-    except Exception as err:
-        message_loud(('Error loading {}!\n\n{}\n\n'.format(pypackage, err) +
-                      'Get the traceback by launching klayout from command line'))
-        raise
+    if sys.version_info.major >= 3:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(pypackage, version_file)
+        source_version_module = importlib.util.module_from_spec(spec)
+        try:
+            spec.loader.exec_module(source_version_module)
+        except Exception as err:
+            message_loud(('Error loading {}!\n\n{}\n\n'.format(pypackage, err) +
+                        'Get the traceback by launching klayout from command line'))
+            raise
+    else:
+        import imp
+        source_version_module = imp.load_source(pypackage, version_file)
     try:
         return source_version_module.__version__
     except AttributeError as err:
