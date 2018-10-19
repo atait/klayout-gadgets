@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <salt-grain>
  <name>lypy_hybrid</name>
- <version>0.0.10</version>
+ <version>0.0.11</version>
  <api-version>0.1</api-version>
  <title>lypy_hybrid</title>
  <doc>Example package for lygadget demo</doc>
