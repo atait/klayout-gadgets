@@ -57,6 +57,10 @@ def klayout_home():
     return ly_home
 
 
+def klayout_version():
+    return '0.25.3'  # TODO: make this not hard coded
+
+
 def is_windows():
     if platform == "linux" or platform == "linux2":
         return False
@@ -66,4 +70,73 @@ def is_windows():
         return True
     else:
         raise ValueError('Unrecognized operating system: {}'.format(platform))
+
+
+''' Spoof a whole bunch of stuff related to pya GUI.
+
+    The problem this is trying to solve is when layout modules try to import GUI things and call them.
+    When you run them in standalone, either those QElements don't exist, or they error for whatever reason.
+    Nevertheless, you want to import that module to access its other functionality
+
+    The desired behavior of these GUI things is pretty simple: don't error, do nothing.
+    At the same time, we'd like the ability to override our override
+    in case there are one or two important things, like instance.version() returning a string
+'''
+
+class NS_Catcher(type):
+    ''' All this does is override the pya namespace with this class '''
+    def __init__(cls, name, bases, dct):
+        setattr(pya, name, cls)
+        super().__init__(name, bases, dct)
+
+    def __getattr__(cls, attr):
+        return PhonyClass()
+
+
+class PhonyClass(metaclass=NS_Catcher):
+    ''' It only ever gives instances of PhonyClass when called or as attributes.
+        It is good for stifling those long chained calls like::
+
+            pya.QFormBuilder().load(ui_file, pya.Application.instance().main_window()).findChild('ok').clicked(self.ok)
+
+        That call will do nothing of course, but it also won't error.
+    '''
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def __call__(self, *args, **kwargs):
+        return PhonyClass()
+
+    def __getattr__(self, attr):
+        return PhonyClass()
+
+    def __setattr__(self, attr, value):
+        pass
+
+
+if pya is not None:
+    if not isGUI():
+        class QMessageBox(PhonyClass): pass
+
+        class QMessageBox_StandardButton(PhonyClass): pass
+
+        class QFile(PhonyClass): pass
+
+        class QIODevice(PhonyClass): pass
+
+        class QFormBuilder(PhonyClass): pass
+
+    if not isGSI():
+        class PhonyInstance(PhonyClass):
+            ''' This has to return a string sometimes '''
+            def application_data_path(self):
+                return klayout_home()
+
+            def version(self):
+                return klayout_version()
+
+        class Application(PhonyClass):
+            instance = PhonyInstance
+
+
 
