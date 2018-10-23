@@ -31,20 +31,6 @@ else:
 isGUI = lambda: _isGUI
 
 
-''' Determine what we will use for pya
-    and then override it with the standalone in sys.modules.
-    This will not error even if you are not in klayout GSI and don't have the klayout.db standalone
-'''
-if isGSI():
-    import pya
-else:
-    try:
-        import klayout.db as pya
-        sys.modules['pya'] = pya
-    except ImportError as err:
-        pya = None
-
-
 def klayout_home():
     ''' Figure out the klayout configuration directory.
         Uses exactly the same logic as used in the klayout source.
@@ -70,6 +56,28 @@ def is_windows():
         return True
     else:
         raise ValueError('Unrecognized operating system: {}'.format(platform))
+
+
+
+### The important stuff happens below ###
+
+
+''' Determine what we will use for pya.
+    Do not override it with the standalone in sys.modules yet
+    This statement:
+        from lygadgets import pya
+    will not error even if you are not in klayout GSI and don't have the klayout.db standalone
+'''
+if isGSI():
+    import pya
+    using_standalone = False
+else:
+    try:
+        import klayout.db as pya
+        using_standalone = True
+    except ImportError as err:
+        pya = None
+        using_standalone = False
 
 
 ''' Spoof a whole bunch of stuff related to pya GUI.
@@ -114,7 +122,19 @@ class PhonyClass(metaclass=NS_Catcher):
         pass
 
 
-if pya is not None:
+def patch_environment():
+    ''' Run this function, then your old scripts for klayout will work with the standalone.
+        That's the idea anyways.
+
+        Now we start changing things in the environment. Afterwards, this statement:
+            import pya
+        might give you regular pya or klayout.db, depending.
+
+        GUI and Application things are added and/or spoofed.
+    '''
+    if using_standalone:
+        sys.modules['pya'] = pya
+
     if not isGUI():
         class QMessageBox(PhonyClass): pass
 
@@ -137,6 +157,4 @@ if pya is not None:
 
         class Application(PhonyClass):
             instance = PhonyInstance
-
-
 
