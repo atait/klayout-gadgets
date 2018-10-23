@@ -5,6 +5,7 @@ except NameError:
     FileNotFoundError = IOError
 
 import os
+import sys
 import subprocess
 from importlib import import_module
 
