@@ -124,6 +124,9 @@ class PhonyClass(metaclass=NS_Catcher):
     def __setattr__(self, attr, value):
         pass
 
+    def __add__(self, other):
+        return 0
+
 
 def patch_environment():
     ''' Run this function, then your old scripts for klayout will work with the standalone.
