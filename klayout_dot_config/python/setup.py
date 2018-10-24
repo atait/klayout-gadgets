@@ -7,7 +7,7 @@ def readme():
 
 
 setup(name='lygadgets',
-      version='0.0.15',
+      version='0.0.16',
       description='Tools to make klayout and python work better together',
       long_description=readme(),
       author='Alex Tait',
