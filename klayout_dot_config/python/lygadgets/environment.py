@@ -39,7 +39,10 @@ def klayout_home():
     if ly_home == '':
         ly_home = os.path.join(os.path.expanduser('~'), 'KLayout' if is_windows() else '.klayout')
     if not os.path.exists(ly_home):
-        raise FileNotFoundError('The KLayout config directory was not found. KLayout might not be installed.')
+        print('The KLayout config directory was not found. KLayout might not be installed.')
+        print('Creating it just in case that solves things')
+        os.mkdir(ly_home)
+        # raise FileNotFoundError('The KLayout config directory was not found. KLayout might not be installed.')
     return ly_home
 
 
