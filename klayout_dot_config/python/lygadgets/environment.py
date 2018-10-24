@@ -149,6 +149,8 @@ def patch_environment():
 
         class QFormBuilder(PhonyClass): pass
 
+        class MessageBox(PhonyClass): pass
+
     if not isGSI():
         class PhonyInstance(PhonyClass):
             ''' This has to return a string sometimes '''
