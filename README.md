@@ -21,9 +21,11 @@ This has a special focus on script-based layout of integrated circuits. Scripts 
 - `pya` is allowed and necessary in some cases, but it is not available outside of the GSI (unless you have the klayout standalone). Everything based on system python launches must avoid pya or fail gracefully
 
 ### Definition of terms
-**lypackage (or salt package)**: handled by the klayout Package Manager. It includes a `grain.xml`. These can define macros, DRC, python packages, etc.
+**lypackage**: An extension to klayout packaged in a particular format. It includes a `grain.xml`. It can define macros, DRC, python packages, etc.
 
-**pypackage**: python package included as part of the lypackage. It will now be auto-installed to both klayout and system, if desired.
+**salt package**: A lypackage that is published and available through the klayout Package Manager.
+
+**pypackage**: python package included as part of a lypackage.
 
 **system python**: the interpreter that runs when you type `python xxx.py` in the command line.
 
@@ -35,6 +37,24 @@ This has a special focus on script-based layout of integrated circuits. Scripts 
 
 **GUI mode**: running scripts when there an open application window. In this mode, GSI is the primary interpreter.
 
+## Packaging philosophies
+<!-- First some desires. Suppose you have a script called `xx.py`. We want to have the same namespace when that script is executed like `klayout -r xx.py`, like `python xx.py`, and from a menu button in the GUI. Ok these are very different use cases. The reason is that `xx` is part of a larger code structure with other modules. All of the imports have to work.
+
+Maybe `xx.py` is eventually to be used in GUI, but you would like to debug its non-GUI subfunctions from command-line. An example of this is lyipc, a single python package, that has components that can be used in both -->aUIOPV560C09/............................................................................. NG
+
+There are three ways a python package can be delivered to you
+
+1. PyPI
+2. git, then run `python setup.py install` or `pip -e install .`. Case a) standalone python package, or Case b) ones contained in a lypackage
+3. salt
+
+In case 1, any related lypackages must be fetched (since they cannot be listed as python dependencies). This is moot because post-install scripts are not allowed. It must be done manually. This is recommended for pure python; however, then the GSI namespace can miss it unless run by the user from the terminal.
+
+**Any code that will eventually run in the GUI should not go through PyPI**. If you have a package "trivial" with function "add_one" and this function is only ever called by you from the command line, it can go PyPI, otherwise it should go through salt. **Exception**: if somebody finds a way to extend the GSI PYTHONPATH. I have tried os.environ
+
+Case 2 is easy. You are likely developing code that is either not on a package manager or changing between major releases. The challenge is keeping it synchronized. In case 2a, there is no lypackage structure -- `lygadgets` can (*should* todo) dynamic link your source into the `.klayout/python` directory. In 2b, `lygadgets` offers the `postinstall_factory` to take care of the linkage.
+
+In case 3, the pypackage goes into klayout. System python will not be able to find it. The solution is to put an autorun script in the lypackage that finds system python and uses it to call `setup.py`. This is lygadget's `export_to_system`.
 
 ## Autoinstall hooks
 There are two categories
