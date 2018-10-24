@@ -7,7 +7,7 @@ def readme():
 
 
 setup(name='lygadgets',
-      version='0.0.4',
+      version='0.0.13',
       description='Tools to make klayout and python work better together',
       long_description=readme(),
       author='Alex Tait',
@@ -15,5 +15,5 @@ setup(name='lygadgets',
       license='MIT',
       packages=['lygadgets'],
       install_requires=[],
-      entry_points={},
+      entry_points={'console_scripts': ['lygadget_link=lygadgets.command_line:cm_link_any']},
       )

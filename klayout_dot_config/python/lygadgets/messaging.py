@@ -1,3 +1,4 @@
+from __future__ import print_function
 from lygadgets import pya, isGUI
 
 if isGUI():
@@ -8,4 +9,4 @@ else:
     PINK = '\033[95m'
     NORMAL_COLOR = '\033[0m'
     message = print
-    message_loud = lambda msg: print(PINK + str(msg), NORMAL_COLOR, **kwargs)
+    message_loud = lambda msg: print(PINK + str(msg), NORMAL_COLOR)

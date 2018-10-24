@@ -1,27 +1,44 @@
 # klayout-gadgets
-**This is a prototype still in progress.**
 
-**It has been tested on MacOS HighSierra and is expected to work on other distributions of MacOS and Linux with python 3 and klayout >= 0.25.3. No windows yet.**
+Tools to make klayout and python work better together, with a focus on script-based layout of integrated circuits. There are some python-driven scripters and others that use the klayout language. Both can use tools to get certain simple information about klayout. The problem is that their environments and even execution engines are extremely different.
 
-Tools to make klayout and python work together better.
+The purpose of this package is to provide simple klayout-related tools in a way that is highly robust to the environment in which it is being interpreted.
+
+- No import errors when you are trying to test/debug a pure python aspect of an otherwise klayout GSI script.
+- No inconsistencies between GSI and system namespace.
 
 ![](klayout_dot_config/icons/lygadgets.png?raw=true)
 
-Specifically, it makes hybrid salt packages (klayout macros and python) easier by auto-installing the python part in *system* python and of course is always visible in the klayout namespace.
 
-This has a special focus on script-based layout of integrated circuits. Scripts that are run within klayout should also run correctly when running without the klayout application. Eventually, this should make transitioning to the klayout python standalone smoother.
+## Installation
 
-### Here are the rules for this package
+### Step 1: install the python package
+From PyPI
 
-- no calling `klayout -r foo.py` from the command line
-- no phidl
-- no reference to particular technologies or specific types of properties (e.g. "WAVEGUIDES.xml")
-- lightweight as possible
-- `klayout.db` is allowed if it speeds it up, but it cannot be required
-- `pya` is allowed and necessary in some cases, but it is not available outside of the GSI (unless you have the klayout standalone). Everything based on system python launches must avoid pya or fail gracefully
+```bash
+pip install lygadgets
+```
 
-### Definition of terms
-**lypackage**: An extension to klayout packaged in a particular format. It includes a `grain.xml`. It can define macros, DRC, python packages, etc.
+or from source
+
+```bash
+git clone git@github.com:atait/klayout-gadgets.git
+pip install klayout-gadgets/klayout_dot_config/python
+```
+
+### Step 2: link to klayout
+Hey, you have a new terminal script that can link all kinds of stuff to the proper places in the klayout configuration directories.
+
+```bash
+lygadgets_link lygadgets
+```
+
+## Installation (alternative)
+This one is based on the klayout salt Package Manager and is not really recommended unless you know what you are doing. You have to go into the GUI application to use it - no command line installation. It automatically takes care of putting lygadgets into your system namespace.
+
+
+## Definition of terms
+**lypackage (or salt package)**: handled by the klayout Package Manager. It includes a `grain.xml`. These can define macros, DRC, python packages, etc.
 
 **salt package**: A lypackage that is published and available through the klayout Package Manager.
 
@@ -56,10 +73,55 @@ Case 2 is easy. You are likely developing code that is either not on a package m
 
 In case 3, the pypackage goes into klayout. System python will not be able to find it. The solution is to put an autorun script in the lypackage that finds system python and uses it to call `setup.py`. This is lygadget's `export_to_system`.
 
-## Autoinstall hooks
-There are two categories
+## Here are the rules for this package
 
-### From klayout GUI package manager.
+- no reference to particular technologies or specific types of properties (e.g. "WAVEGUIDES.xml")
+- no calling `subprocess.call('klayout -r foo.py')`
+- no phidl in the implementation. Of course phidl packages will use this one.
+- `klayout.db` is allowed if it speeds it up, but it cannot be required
+
+
+## See the example
+I think it's a pretty decent way to see what happens when namespaces get desynchronized, how to use lygadgets, what happens when you call klayout from the command line.
+
+
+## Features: simple stuff everybody uses for script-based layout
+
+### Environment
+Detects the interpreter in which code is being run. Provides a `pya` that is safe to import. In system interpreter, this will break
+
+```python
+import pya
+```
+
+but this will never break:
+
+```python
+from lygadgets import pya
+```
+
+however, of course, you then cannot try to use the GUI features of `pya`. You can't use it at all if you are running system python.
+
+If you have the klayout python standalone, that is what you will get as "pya". Then, its layout database features will be available, just like the regular GSI version of `pya` in batch mode.
+
+### Markup reading
+This will, in the future, expand into technology component access, which are just XML files. Outside of GSI, `pya.Technology` breaks, and `klayout.db.Technology` has not loaded the technology list.
+
+Also includes the `yaml` package, so you can just `import yaml` within the GSI.
+
+### Messaging
+`message` and `message_loud` will detect the best way to report to the user, either in or out of GUI mode.
+
+
+## Major feature: namespace linkage, autoinstall hooks
+These are technical notes, worth understanding if you are developing new klayout packages with hybrid GSI/system aspects.
+
+**If you are a user, all you need to know is that `lygadgets_link` does what you need**
+
+NB: This package so far tested on MacOS HighSierra and is expected to work on other distributions of MacOS and Linux with python 3 and klayout >= 0.25.3. Windows supports python > klayout linking, but not klayout > system.
+
+
+### Type 1: From klayout to system
 This looks in the package directory and does setup.py for the python package. Every time the application opens
 
 - done
@@ -111,7 +173,9 @@ Here is what you cannot do
 - use pyenv (Also think this would be fine, but not tested)
 - use Windows
 
-### From a python component
+
+
+### Type 2: From python component to klayout
 
 - Currently: finds enclosing klayout_dot_config and makes a symlink
 - Ideally: download the thing from github and put the hard thing in the right place
@@ -130,7 +194,8 @@ Where you would use this: **developer mode**, particularly when the klayout pack
     1. it symlinks to your git clone from the `.klayout/salt` directory
     1. Finally, changes you make in your git clone will be reflected immediately in the klayout application
 
-#### Here's how
+
+## Best practices on packaging a hybrid lyproject
 You must structure your package like this. Starred names are *required to be named exactly*
 
 ```
@@ -152,47 +217,31 @@ my-git-project
 Put this in your `setup.py`:
 
 ```python
-def my_postinstall():
-    try:
-        from lygadgets import post_install_factory
-    except (ImportError, ModuleNotFoundError):
-        print('\033[95mlygadgets not found, so klayout package not linked.')
-        print('Please download it in the klayout Package Manager\033[0m')
-        return dict()
-    else:
-        lypackage_root = os.path.realpath(os.path.join('..', '..', 'klayout_dot_config'))
-        return {'install': post_install_factory(lypackage_root)}
+try:
+    from lygadgets import postinstall_hook
+except (ImportError, ModuleNotFoundError):
+    print('\033[95mlygadgets not found, so klayout package not linked.')
+    print('Please download it in the klayout Package Manager\033[0m')
+    my_postinstall = dict()
+else:
+    setup_dir = os.path.dirname(os.path.realpath(__file__))
+    lypackage_dir = os.path.dirname(setup_dir)
+    my_postinstall = {'install': postinstall_hook(lypackage_dir)}
 
 ...
 
 setup(
       ...
-      cmdclass=my_postinstall(),
+      cmdclass=my_postinstall,
       ...
       )
 ```
 
-## Environment
-Detects the interpreter in which code is being run. Provides a `pya` that is safe to import. In system interpreter, this will break
+Note this code *will not run* if `pip install`, and all your users have to do `lygadgets_link mypackage`. This situation always occurs when using PyPI.
 
-```python
-import pya
-```
+If `setup.py install` is used, no problem. This is more likely to be the method of installation when users install from source in a git project.
 
-but this will never break:
 
-```python
-from lygadgets import pya
-```
+#### Authors: Alex Tait, Adam McCaughan, Sonia Buckley, Jeff Chiles, Jeff Shainline, Rich Mirin, Sae Woo Nam
+#### National Institute of Standards and Technology, Boulder, CO, USA
 
-however, of course, you then cannot try to use the GUI features of `pya`.
-
-If you have the klayout python standalone, that is what you will get as "pya". Then, its layout database features will be available, just like the regular GSI version of `pya`.
-
-## Markup reading
-This will, in the future, expand into technology component access, which are just XML files. Outside of GSI, `pya.Technology` breaks, and `klayout.db.Technology` has not loaded the technology list.
-
-Also includes the `yaml` package, so you can just `import yaml` within the GSI.
-
-## Messaging
-`message` and `message_loud` will detect the best way to report to the user, either in or out of GUI mode.

@@ -1,9 +1,16 @@
+from __future__ import print_function
+try:  # python 2 does not have FileNotFoundError. Check it
+    FileNotFoundError
+except NameError:
+    FileNotFoundError = IOError
+
 import os
+import sys
 import subprocess
-import importlib.util
 from importlib import import_module
 
-from lygadgets import message, message_loud
+from lygadgets.messaging import message, message_loud
+from lygadgets.environment import is_windows
 
 pypackage = None
 
@@ -19,6 +26,13 @@ def get_klayout_version():
 
 _system_python = None
 def system_python():
+    ''' Fix the PATH to prioritize /usr/local/bin
+
+        This is no longer windows compatible.
+        If we are running in windows, it always raises a
+    '''
+    if is_windows():
+        raise RuntimeError('finding system_python on Windows not supported.')
     global _system_python
     if _system_python is None:
         # Fix the PATH to prioritize /usr/local/bin
@@ -83,25 +97,30 @@ def get_system_version():
         all_talking = retraw.decode().strip("'").strip('\n')
         printed_lines = all_talking.split('\n')
         return printed_lines[-1]
-    except (ImportError, ModuleNotFoundError, subprocess.CalledProcessError):
-        # It's not installed at all
-        return '-1'
     except AttributeError as err:
         err.args = ('The package {} does not define a __version__ in its __init__.py'.format(pypackage), ) + err.args[:1]
         raise
+    except (ImportError, ModuleNotFoundError, subprocess.CalledProcessError, RuntimeError):
+        # It's not installed at all
+        return '-1'
 
 
 # Source version
 def get_source_version(pypackage_dir):
     version_file = os.path.join(pypackage_dir, pypackage, '__init__.py')
-    spec = importlib.util.spec_from_file_location(pypackage, version_file)
-    source_version_module = importlib.util.module_from_spec(spec)
-    try:
-        spec.loader.exec_module(source_version_module)
-    except Exception as err:
-        message_loud(('Error loading {}!\n\n{}\n\n'.format(pypackage, err) +
-                      'Get the traceback by launching klayout from command line'))
-        raise
+    if sys.version_info.major >= 3:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(pypackage, version_file)
+        source_version_module = importlib.util.module_from_spec(spec)
+        try:
+            spec.loader.exec_module(source_version_module)
+        except Exception as err:
+            message_loud(('Error loading {}!\n\n{}\n\n'.format(pypackage, err) +
+                        'Get the traceback by launching klayout from command line'))
+            raise
+    else:
+        import imp
+        source_version_module = imp.load_source(pypackage, version_file)
     try:
         return source_version_module.__version__
     except AttributeError as err:

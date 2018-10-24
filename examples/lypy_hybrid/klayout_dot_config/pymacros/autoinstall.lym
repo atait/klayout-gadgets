@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>Export lybar to system</description>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut/>
+ <show-in-menu>true</show-in-menu>
+ <menu-path>lygadget_demo.end</menu-path>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text>
+
+
+import pya
+import os
+
+# Attempt to install the python package in the system
+pypackage_name = 'lybar'
+lypackage_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+try:
+    import lygadgets
+except ImportError:
+    pya.MessageBox.info('Message for you',
+                        ('lygadgets is not visible, ' +
+                         'so {} autoinstall is unavailable.\n'.format(pypackage_name) +
+                         'Please install from the salt package manager'),
+                        pya.MessageBox.Ok)
+else:
+    lygadgets.export_to_system(pypackage_name, lypackage_dir)
+
+
+ </text>
+</klayout-macro>

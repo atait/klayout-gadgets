@@ -1,7 +1,7 @@
-__version__ = '0.0.4'
+__version__ = '0.0.13'
 
-from .environment import pya, isGUI, isGSI
-from .messaging import message, message_loud
-from .markup import xml_to_dict
-from .system_linker import export_to_system
-from .salt_linker import post_install_factory
+from lygadgets.environment import pya, isGUI, isGSI, patch_environment
+from lygadgets.messaging import message, message_loud
+from lygadgets.markup import xml_to_dict
+from lygadgets.system_linker import export_to_system
+from lygadgets.salt_linker import postinstall_hook
