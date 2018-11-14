@@ -89,11 +89,18 @@ def is_pymodule(source):
 
 
 def is_lytech(source):
-    for file_obj in os.listdir(source):
-        if file_obj.endswith('.lyt'):
-            return True
+    ''' In this case the "source" is the full tech directory or the .lyt file
+        It always returns the tech directory path
+    '''
+    if os.path.isfile(source) and source.endswith('.lyt'):
+        enclosing_dir = os.path.dirname(source)
+        return enclosing_dir
     else:
-        return False
+        for file_obj in os.listdir(source):
+            if file_obj.endswith('.lyt'):
+                return source
+        else:
+            return False
 
 
 def module_from_str(module):
@@ -130,9 +137,10 @@ def dest_from_srcdir(source):
     elif is_pypackage(source) or is_pymodule(source):
         link_dir = os.path.join(klayout_home(), 'python')
         link_name = os.path.splitext(os.path.basename(source))[0]
-    elif is_lytech(source):
+    elif is_lytech(source) != False:
+        enclosing_dir = is_lytech(source)
         link_dir = os.path.join(klayout_home(), 'tech')
-        link_name = os.path.splitext(os.path.basename(source))[0]
+        link_name = os.path.splitext(os.path.basename(enclosing_dir))[0]
 
     if not os.path.exists(link_dir):
         os.mkdir(link_dir)
