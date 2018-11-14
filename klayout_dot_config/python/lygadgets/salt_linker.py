@@ -103,6 +103,12 @@ def is_lytech(source):
             return False
 
 
+def is_lym(source):
+    if not os.path.isfile(source):
+        return False
+    return source.endswith('.lym')
+
+
 def module_from_str(module):
     if type(module) is ModuleType:
         return module
@@ -141,6 +147,9 @@ def dest_from_srcdir(source):
         enclosing_dir = is_lytech(source)
         link_dir = os.path.join(klayout_home(), 'tech')
         link_name = os.path.splitext(os.path.basename(enclosing_dir))[0]
+    elif is_lym(source):
+        link_dir = os.path.join(klayout_home(), 'macros')
+        link_name = os.path.basename(source)
 
     if not os.path.exists(link_dir):
         os.mkdir(link_dir)
