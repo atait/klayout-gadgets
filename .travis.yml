@@ -3,6 +3,9 @@ language: python
 python: '3.6'
 os: linux
 
+# klayout builds from source so this saves 15 minutes on subsequent jobs
+cache: pip
+
 install:
   - pip install -r requirements.txt
   - pip install .
