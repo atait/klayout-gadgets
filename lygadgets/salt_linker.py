@@ -220,10 +220,11 @@ def link_any(any_source, overwrite=False, hard_copy=False, exclude_python_types=
         else:
             symlink_windows(src, dest)
 
-    if is_installed_python(any_source) or is_pypackage(any_source):
-        for file_obj in os.listdir(src):
-            file = os.path.join(src, file_obj)
-            link_any(file, overwrite=overwrite, hard_copy=hard_copy, exclude_python_types=True)
+    # klayout will find the lym in the pypackage; the below will double link it
+    # if is_installed_python(any_source) or is_pypackage(any_source):
+    #     for file_obj in os.listdir(src):
+    #         file = os.path.join(src, file_obj)
+    #         link_any(file, overwrite=overwrite, hard_copy=hard_copy, exclude_python_types=True)
 
     return src, dest
 
