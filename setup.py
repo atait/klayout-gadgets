@@ -15,5 +15,7 @@ setup(name='lygadgets',
       license='MIT',
       packages=['lygadgets'],
       install_requires=[],
+      package_data={'': ['*.lym']},
+      include_package_data=True,
       entry_points={'console_scripts': ['lygadgets_link=lygadgets.command_line:cm_link_any']},
       )

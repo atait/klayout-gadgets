@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>lygadgets initialize</description>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>true</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut/>
+ <show-in-menu>false</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text>
+
+# Doesn't really do anything besides confirming that it's there
+# Demonstrates how this can be done in other packages
+
+import pya
+pya.Application.instance().main_window().message('Initializing lygadgets', 5000)
+
+</text>
+</klayout-macro>
