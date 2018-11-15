@@ -5,6 +5,10 @@ os: linux
 
 install:
   - pip install .
+# this is a dummy script
+script:
+  - DOCKER=1 source examples/status
+
 deploy:
   provider: pypi
   user: atait
