@@ -154,6 +154,10 @@ def patch_environment():
 
         class MessageBox(PhonyClass): pass
 
+        class QDialog(PhonyClass): pass
+
+        class Qt(PhonyClass): pass
+
     if not isGSI():
         class PhonyInstance(PhonyClass):
             ''' This has to return a string sometimes '''
