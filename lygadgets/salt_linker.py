@@ -103,10 +103,24 @@ def is_lytech(source):
             return False
 
 
-def is_lym(source):
+def is_macro(source):
     if not os.path.isfile(source):
         return False
-    return source.endswith('.lym')
+    if not source.endswith('.lym'):
+        return False
+    return True
+
+
+def is_pymacro(source):
+    if not is_macro(source):
+        return False
+    with open(source) as macro:
+        interpreter = xml_to_dict(macro.read())['klayout-macro']['interpreter']
+    return interpreter.lower() == 'python'
+
+
+def is_rubymacro(source):
+    return is_macro(source) not is_pymacro(source)
 
 
 def module_from_str(module):
@@ -147,8 +161,8 @@ def dest_from_srcdir(source):
         enclosing_dir = is_lytech(source)
         link_dir = os.path.join(klayout_home(), 'tech')
         link_name = os.path.splitext(os.path.basename(enclosing_dir))[0]
-    elif is_lym(source):
-        link_dir = os.path.join(klayout_home(), 'macros')
+    elif is_macro(source):
+        link_dir = os.path.join(klayout_home(), 'pymacros' if is_pymacro(source) else 'macros')
         link_name = os.path.basename(source)
 
     if not os.path.exists(link_dir):

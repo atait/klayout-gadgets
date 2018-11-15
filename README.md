@@ -1,13 +1,15 @@
 # klayout-gadgets
 
-Tools to make klayout and python work better together, with a focus on script-based layout of integrated circuits. There are some python-driven scripters and others that use the klayout language. Both can use tools to get certain simple information about klayout. The problem is that their environments and even execution engines are extremely different.
+Tools to make klayout, the standalone, and python environments work better together.
+
+Particular focus on script-based layout of integrated circuits. There are some python-driven scripters and others that use the klayout language. Both can use tools to get certain simple information about klayout. The problem is that their environments and even execution engines are extremely different.
 
 The purpose of this package is to provide simple klayout-related tools in a way that is highly robust to the environment in which it is being interpreted.
 
 - No import errors when you are trying to test/debug a pure python aspect of an otherwise klayout GSI script.
 - No inconsistencies between GSI and system namespace.
 
-![](klayout_dot_config/icons/lygadgets.png?raw=true)
+![](icons/lygadgets.png?raw=true)
 
 
 ## Installation
