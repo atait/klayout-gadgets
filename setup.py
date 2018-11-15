@@ -15,5 +15,5 @@ setup(name='lygadgets',
       license='MIT',
       packages=['lygadgets'],
       install_requires=[],
-      entry_points={'console_scripts': ['lygadget_link=lygadgets.command_line:cm_link_any']},
+      entry_points={'console_scripts': ['lygadgets_link=lygadgets.command_line:cm_link_any']},
       )
