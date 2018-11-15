@@ -92,9 +92,11 @@ def is_lytech(source):
     ''' In this case the "source" is the full tech directory or the .lyt file
         It always returns the tech directory path
     '''
-    if os.path.isfile(source) and source.endswith('.lyt'):
-        enclosing_dir = os.path.dirname(source)
-        return enclosing_dir
+    if os.path.isfile(source):
+        if source.endswith('.lyt'):
+            source = os.path.dirname(source)
+        else:
+            return False
     else:
         for file_obj in os.listdir(source):
             if file_obj.endswith('.lyt'):
@@ -103,7 +105,7 @@ def is_lytech(source):
             return False
 
 
-def is_macro(source):
+def is_lymacro(source):
     if not os.path.isfile(source):
         return False
     if not source.endswith('.lym'):
@@ -112,7 +114,7 @@ def is_macro(source):
 
 
 def is_pymacro(source):
-    if not is_macro(source):
+    if not is_lymacro(source):
         return False
     with open(source) as macro:
         interpreter = xml_to_dict(macro.read())['klayout-macro']['interpreter']
@@ -120,7 +122,7 @@ def is_pymacro(source):
 
 
 def is_rubymacro(source):
-    return is_macro(source) and not is_pymacro(source)
+    return is_lymacro(source) and not is_pymacro(source)
 
 
 def module_from_str(module):
@@ -150,20 +152,26 @@ def srcdir_from_any(source):
         raise FileNotFoundError('{} does not exist'.format(source))
 
 
-def dest_from_srcdir(source):
+def dest_from_srcdir(source, exclude_python_types=False):
     if is_lypackage(source):
         link_name = lypackage_name(source)
         link_dir = os.path.join(klayout_home(), 'salt')
-    elif is_pypackage(source) or is_pymodule(source):
-        link_dir = os.path.join(klayout_home(), 'python')
-        link_name = os.path.splitext(os.path.basename(source))[0]
     elif is_lytech(source) != False:
         enclosing_dir = is_lytech(source)
         link_dir = os.path.join(klayout_home(), 'tech')
         link_name = os.path.splitext(os.path.basename(enclosing_dir))[0]
-    elif is_macro(source):
+    elif is_lymacro(source):
         link_dir = os.path.join(klayout_home(), 'pymacros' if is_pymacro(source) else 'macros')
         link_name = os.path.basename(source)
+    elif is_pypackage(source) or is_pymodule(source):
+        if not exclude_python_types:
+            link_dir = os.path.join(klayout_home(), 'python')
+            link_name = os.path.splitext(os.path.basename(source))[0]
+        else:
+            return None
+            # raise TypeError('Python thing found but it is being excluded')
+    else:
+        raise TypeError('Did not recognize the klayout relevance/format of {}'.format(source))
 
     if not os.path.exists(link_dir):
         os.mkdir(link_dir)
@@ -171,18 +179,27 @@ def dest_from_srcdir(source):
     return link
 
 
-def link_any(any_source, overwrite=False, hard_copy=False):
+def link_any(any_source, overwrite=False, hard_copy=False, exclude_python_types=False):
     ''' Directories take precedence over installed python module
 
         Platform independent.
 
         Always overwrites existing symbolic links.
 
-        Returns the full paths of source and destination if the link was created, otherwise None for both
+        Returns the full paths of source and destination if the link was created, otherwise None for both.
+
+        If you have given it a python package or an installed module, it will search its top-level
+        package dir (with __init__.py) for any macros and link those too.
 
     '''
+    # import pdb; pdb.set_trace()
     src = srcdir_from_any(any_source)
-    dest = dest_from_srcdir(src)
+    try:
+        dest = dest_from_srcdir(src, exclude_python_types=exclude_python_types)
+    except TypeError as err:
+        return None, None
+    if dest is None:
+        return None, None
 
     if src == dest:
         # Prevent circular reference
