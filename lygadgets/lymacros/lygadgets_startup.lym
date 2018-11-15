@@ -32,7 +32,7 @@ except:
                          'lygadgets_link lygadgets'),
                         pya.MessageBox.Ok)
 else:
-    lygadgets.message_loud('Initializing lygadgets')
+    lygadgets.message('Initializing lygadgets')
 
 </text>
 </klayout-macro>
