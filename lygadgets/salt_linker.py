@@ -120,7 +120,7 @@ def is_pymacro(source):
 
 
 def is_rubymacro(source):
-    return is_macro(source) not is_pymacro(source)
+    return is_macro(source) and not is_pymacro(source)
 
 
 def module_from_str(module):
@@ -142,7 +142,7 @@ def is_installed_python(module):
 
 def srcdir_from_any(source):
     if os.path.exists(source):
-        return source
+        return os.path.realpath(source)
     elif is_installed_python(source):
         module = module_from_str(source)
         return module.__path__[0]
@@ -181,7 +181,6 @@ def link_any(any_source, overwrite=False, hard_copy=False):
         Returns the full paths of source and destination if the link was created, otherwise None for both
 
     '''
-    any_source = os.path.realpath(any_source)
     src = srcdir_from_any(any_source)
     dest = dest_from_srcdir(src)
 

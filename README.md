@@ -111,6 +111,9 @@ NB: This package so far tested on MacOS HighSierra and is expected to work on ot
 - no phidl in the implementation. Of course phidl packages will use this one.
 - `klayout.db` is allowed if it speeds it up, but it cannot be required
 
+### Todo
+- detect version of lypackages and pypackages to determine whether or not to force
+
 #### Authors: Alex Tait, Adam McCaughan, Sonia Buckley, Jeff Chiles, Jeff Shainline, Rich Mirin, Sae Woo Nam
 #### National Institute of Standards and Technology, Boulder, CO, USA
 
