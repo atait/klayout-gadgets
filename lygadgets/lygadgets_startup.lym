@@ -20,7 +20,19 @@
 # Demonstrates how this can be done in other packages
 
 import pya
-pya.Application.instance().main_window().message('Initializing lygadgets', 5000)
+
+# This also does nothing because if this lym is running, then the whole thing has been linked
+# For other packages, they need to check for lygadget linking in their startup.lym
+try:
+    import lygadgets
+except:
+    pya.MessageBox.info('Message for you',
+                        ('lygadgets has not been linked.\n' +
+                         'Go into terminal/command line anywhere and type\n\n' +
+                         'lygadgets_link lygadgets'),
+                        pya.MessageBox.Ok)
+else:
+    lygadgets.message_loud('Initializing lygadgets')
 
 </text>
 </klayout-macro>
