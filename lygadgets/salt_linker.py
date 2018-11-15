@@ -89,11 +89,40 @@ def is_pymodule(source):
 
 
 def is_lytech(source):
-    for file_obj in os.listdir(source):
-        if file_obj.endswith('.lyt'):
-            return True
+    ''' In this case the "source" is the full tech directory or the .lyt file
+        It always returns the tech directory path
+    '''
+    if os.path.isfile(source):
+        if source.endswith('.lyt'):
+            source = os.path.dirname(source)
+        else:
+            return False
     else:
+        for file_obj in os.listdir(source):
+            if file_obj.endswith('.lyt'):
+                return source
+        else:
+            return False
+
+
+def is_lymacro(source):
+    if not os.path.isfile(source):
         return False
+    if not source.endswith('.lym'):
+        return False
+    return True
+
+
+def is_pymacro(source):
+    if not is_lymacro(source):
+        return False
+    with open(source) as macro:
+        interpreter = xml_to_dict(macro.read())['klayout-macro']['interpreter']
+    return interpreter.lower() == 'python'
+
+
+def is_rubymacro(source):
+    return is_lymacro(source) and not is_pymacro(source)
 
 
 def module_from_str(module):
@@ -115,7 +144,7 @@ def is_installed_python(module):
 
 def srcdir_from_any(source):
     if os.path.exists(source):
-        return source
+        return os.path.realpath(source)
     elif is_installed_python(source):
         module = module_from_str(source)
         return module.__path__[0]
@@ -123,16 +152,26 @@ def srcdir_from_any(source):
         raise FileNotFoundError('{} does not exist'.format(source))
 
 
-def dest_from_srcdir(source):
+def dest_from_srcdir(source, exclude_python_types=False):
     if is_lypackage(source):
         link_name = lypackage_name(source)
         link_dir = os.path.join(klayout_home(), 'salt')
-    elif is_pypackage(source) or is_pymodule(source):
-        link_dir = os.path.join(klayout_home(), 'python')
-        link_name = os.path.splitext(os.path.basename(source))[0]
-    elif is_lytech(source):
+    elif is_lytech(source) != False:
+        enclosing_dir = is_lytech(source)
         link_dir = os.path.join(klayout_home(), 'tech')
-        link_name = os.path.splitext(os.path.basename(source))[0]
+        link_name = os.path.splitext(os.path.basename(enclosing_dir))[0]
+    elif is_lymacro(source):
+        link_dir = os.path.join(klayout_home(), 'pymacros' if is_pymacro(source) else 'macros')
+        link_name = os.path.basename(source)
+    elif is_pypackage(source) or is_pymodule(source):
+        if not exclude_python_types:
+            link_dir = os.path.join(klayout_home(), 'python')
+            link_name = os.path.splitext(os.path.basename(source))[0]
+        else:
+            return None
+            # raise TypeError('Python thing found but it is being excluded')
+    else:
+        raise TypeError('Did not recognize the klayout relevance/format of {}'.format(source))
 
     if not os.path.exists(link_dir):
         os.mkdir(link_dir)
@@ -140,19 +179,27 @@ def dest_from_srcdir(source):
     return link
 
 
-def link_any(any_source, overwrite=False, hard_copy=False):
+def link_any(any_source, overwrite=False, hard_copy=False, exclude_python_types=False):
     ''' Directories take precedence over installed python module
 
         Platform independent.
 
         Always overwrites existing symbolic links.
 
-        Returns the full paths of source and destination if the link was created, otherwise None for both
+        Returns the full paths of source and destination if the link was created, otherwise None for both.
+
+        If you have given it a python package or an installed module with .lym's in it, klayout will automatically find them.
+        Note to make sure they come along with the pip distro, use "package_data" in setup.py
 
     '''
-    any_source = os.path.realpath(any_source)
+    # import pdb; pdb.set_trace()
     src = srcdir_from_any(any_source)
-    dest = dest_from_srcdir(src)
+    try:
+        dest = dest_from_srcdir(src, exclude_python_types=exclude_python_types)
+    except TypeError as err:
+        return None, None
+    if dest is None:
+        return None, None
 
     if src == dest:
         # Prevent circular reference
@@ -172,6 +219,12 @@ def link_any(any_source, overwrite=False, hard_copy=False):
             os.symlink(src, dest)
         else:
             symlink_windows(src, dest)
+
+    # klayout will find the lym in the pypackage; the below will double link it
+    # if is_installed_python(any_source) or is_pypackage(any_source):
+    #     for file_obj in os.listdir(src):
+    #         file = os.path.join(src, file_obj)
+    #         link_any(file, overwrite=overwrite, hard_copy=hard_copy, exclude_python_types=True)
 
     return src, dest
 

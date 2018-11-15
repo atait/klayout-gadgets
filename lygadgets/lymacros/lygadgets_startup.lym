@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>lygadgets initialize</description>
+ <version/>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <doc/>
+ <autorun>true</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut/>
+ <show-in-menu>false</show-in-menu>
+ <group-name/>
+ <menu-path/>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text>
+
+# Doesn't really do anything besides confirming that it's there
+# Demonstrates how this can be done in other packages
+
+import pya
+
+# This also does nothing because if this lym is running, then the whole thing has been linked
+# For other packages, they need to check for lygadget linking in their startup.lym
+try:
+    import lygadgets
+except:
+    pya.MessageBox.info('Message for you',
+                        ('lygadgets has not been linked.\n' +
+                         'Go into terminal/command line anywhere and type\n\n' +
+                         'lygadgets_link lygadgets'),
+                        pya.MessageBox.Ok)
+else:
+    lygadgets.message('Initializing lygadgets')
+
+</text>
+</klayout-macro>

@@ -8,12 +8,14 @@ def readme():
 
 setup(name='lygadgets',
       version='0.0.16',
-      description='Tools to make klayout and python work better together',
+      description='Tools to make klayout, the standalone, and python environments work better together',
       long_description=readme(),
       author='Alex Tait',
       author_email='alexander.tait@nist.gov',
       license='MIT',
       packages=['lygadgets'],
       install_requires=[],
-      entry_points={'console_scripts': ['lygadget_link=lygadgets.command_line:cm_link_any']},
+      package_data={'': ['*.lym']},
+      include_package_data=True,
+      entry_points={'console_scripts': ['lygadgets_link=lygadgets.command_line:cm_link_any']},
       )
