@@ -19,6 +19,22 @@ The old README with way too much technical detail. It might come in useful later
 **GUI mode**: running scripts when there an open application window. In this mode, GSI is the primary interpreter.
 
 
+## Packaging philosophies
+There are three ways a python package can be delivered to you
+
+1. PyPI
+2. git, then run `python setup.py install` or `pip -e install .`. Case a) standalone python package, or Case b) ones contained in a lypackage
+3. salt
+
+In case 1, any related lypackages must be fetched (since they cannot be listed as python dependencies). This is moot because post-install scripts are not allowed. It must be done manually. This is recommended for pure python; however, then the GSI namespace can miss it unless run by the user from the terminal.
+
+**Any code that will eventually run in the GUI should not go through PyPI**. If you have a package "trivial" with function "add_one" and this function is only ever called by you from the command line, it can go PyPI, otherwise it should go through salt. **Exception**: if somebody finds a way to extend the GSI PYTHONPATH. I have tried os.environ
+
+Case 2 is easy. You are likely developing code that is either not on a package manager or changing between major releases. The challenge is keeping it synchronized. In case 2a, there is no lypackage structure -- `lygadgets` can (*should* todo) dynamic link your source into the `.klayout/python` directory. In 2b, `lygadgets` offers the `postinstall_factory` to take care of the linkage.
+
+In case 3, the pypackage goes into klayout. System python will not be able to find it. The solution is to put an autorun script in the lypackage that finds system python and uses it to call `setup.py`. This is lygadget's `export_to_system`.
+
+
 ## Autoinstall and linking hooks
 Autoinstall is basically deprecated because pip does not allow post-install hooks, and nobody installs with setup.py.
 
