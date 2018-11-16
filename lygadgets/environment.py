@@ -97,7 +97,8 @@ else:
 class NS_Catcher(type):
     ''' All this does is override the pya namespace with this class '''
     def __init__(cls, name, bases, dct):
-        setattr(pya, name, cls)
+        if pya is not None:
+            setattr(pya, name, cls)
         super().__init__(name, bases, dct)
 
     def __getattr__(cls, attr):

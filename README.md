@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/atait/klayout-gadgets.svg?branch=master)](https://travis-ci.org/atait/klayout-gadgets)
+
 # klayout-gadgets
 
 Tools to make klayout, the standalone, and python environments work better together.

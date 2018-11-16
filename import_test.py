@@ -3,6 +3,7 @@ lygadgets.patch_environment()
 
 import pya
 import os
+# Borrowed from SiEPIC-Tools: https://github.com/lukasc-ubc/SiEPIC-Tools
 wdg = pya.QDialog(pya.Application.instance().main_window())
 wdg.setAttribute(pya.Qt.WA_DeleteOnClose)
 
