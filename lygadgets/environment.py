@@ -160,6 +160,13 @@ def patch_environment():
         class Qt(PhonyClass): pass
 
     if not isGSI():
+        ''' This should be present in the standalone but it is not yet '''
+        try:
+            pya.PCellDeclarationHelper
+        except AttributeError:
+            print('Warning: PCellDeclarationHelper not found in klayout.db')
+            class PCellDeclarationHelper(PhonyClass): pass
+
         class PhonyInstance(PhonyClass):
             ''' This has to return a string sometimes '''
             def application_data_path(self):
