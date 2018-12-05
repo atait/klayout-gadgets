@@ -171,3 +171,13 @@ def patch_environment():
         class Application(PhonyClass):
             instance = PhonyInstance
 
+        ''' Find the python modules that are present in klayout.
+            These get lower import priority than system counterparts, if present
+        '''
+        if os.path.isdir(klayout_home()):
+            for root, dirnames, filenames in os.walk(klayout_home(), followlinks=True):
+                for dn in dirnames:
+                    if dn == 'python':
+                        sys.path.append(os.path.join(root, dn))
+
+
