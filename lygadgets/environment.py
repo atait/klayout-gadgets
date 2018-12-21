@@ -21,11 +21,12 @@ isGSI = lambda: _isGSI
 '''
 if isGSI():
     import pya
-    main = pya.Application.instance().main_window()
-    if main is not None:
-        _isGUI = True
-    else:
+    try:
+        main = pya.Application.instance().main_window()
+    except AttributeError:
         _isGUI = False
+    else:
+        _isGUI = (main is not None)
 else:
     _isGUI = False
 isGUI = lambda: _isGUI
