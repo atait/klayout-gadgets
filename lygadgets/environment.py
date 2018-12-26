@@ -7,9 +7,8 @@ from sys import platform
 '''
 try:
     import pya
-    _isGSI = True
-    pya.Application
-except (ImportError, AttributeError):
+    _isGSI = pya.__package__ == ''
+except ImportError:
     _isGSI = False
 isGSI = lambda: _isGSI
 
