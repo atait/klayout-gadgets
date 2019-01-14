@@ -3,14 +3,15 @@ import sys
 from sys import platform
 
 ''' Detect whether we are in klayout's generic scripting interface
-    Since pya cannot be imported from outside, try that.
+    Since standalone pya has no associated Application, try that
 '''
 try:
     import pya
-    _isGSI = True
     pya.Application
 except (ImportError, AttributeError):
     _isGSI = False
+else:
+    _isGSI = True
 isGSI = lambda: _isGSI
 
 
@@ -18,10 +19,12 @@ isGSI = lambda: _isGSI
     If it launches in batch (-b) or database-only (-zz) mode, then main_window is None.
 
     If however it runs in non-GUI mode (-z), it is not None; however,
-    it has not been given a title yet. (see layApplication.cc)
+    it has not been given a title yet. (see layApplication.cc).
+    This is unstable, so we don't use that information.
+
+    Do not expect this to work in (-z) mode.
 '''
 if isGSI():
-    import pya
     try:
         main = pya.Application.instance().main_window()
     except AttributeError:
@@ -31,6 +34,31 @@ if isGSI():
 else:
     _isGUI = False
 isGUI = lambda: _isGUI
+
+
+''' Determine what we will use for pya.
+    Do not override it with the standalone in sys.modules yet
+    This statement:
+        from lygadgets import pya
+    will not error even if you are not in klayout GSI and don't have the klayout.db standalone
+'''
+if isGSI():
+    _isStandalone = False
+    # GSI:pya was imported above
+else:
+    try:
+        import pya
+        _isStandalone = True
+    except ImportError:
+        print('Warning: You seem to be using an old version of klayout standalone')
+        print('Warning: Try running "pip install --upgrade klayout"')
+        try:
+            import klayout.db as pya
+            _isStandalone = True
+        except ImportError as err:
+            pya = None
+            _isStandalone = False
+isStandalone = lambda: _isStandalone
 
 
 def klayout_home():
@@ -62,27 +90,6 @@ def is_windows():
     else:
         raise ValueError('Unrecognized operating system: {}'.format(platform))
 
-
-
-### The important stuff happens below ###
-
-
-''' Determine what we will use for pya.
-    Do not override it with the standalone in sys.modules yet
-    This statement:
-        from lygadgets import pya
-    will not error even if you are not in klayout GSI and don't have the klayout.db standalone
-'''
-if isGSI():
-    import pya
-    using_standalone = False
-else:
-    try:
-        import klayout.db as pya
-        using_standalone = True
-    except ImportError as err:
-        pya = None
-        using_standalone = False
 
 
 ''' Spoof a whole bunch of stuff related to pya GUI.
@@ -137,11 +144,11 @@ def patch_environment():
 
         Now we start changing things in the environment. Afterwards, this statement:
             import pya
-        might give you regular pya or klayout.db, depending.
+        might give you GSI:pya or pymod:pya, depending.
 
         GUI and Application things are added and/or spoofed.
     '''
-    if using_standalone:
+    if not isStandalone():
         sys.modules['pya'] = pya
 
     if not isGUI():
@@ -162,12 +169,6 @@ def patch_environment():
         class Qt(PhonyClass): pass
 
     if not isGSI():
-        ''' This should be present in the standalone but it is not yet '''
-        try:
-            pya.PCellDeclarationHelper
-        except AttributeError:
-            print('Warning: PCellDeclarationHelper not found in klayout.db')
-            class PCellDeclarationHelper(PhonyClass): pass
 
         class PhonyInstance(PhonyClass):
             ''' This has to return a string sometimes '''
