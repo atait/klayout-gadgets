@@ -98,7 +98,10 @@ def _load_pya_tech(lyt_filename):
 
 def klayout_last_open_technology():
     # use this to pick out a starting "active" technology
-    rc_file = os.path.join(klayout_home(), 'klayoutrc')
-    with open(rc_file, 'r') as file:
-        rc_dict = xml_to_dict(file.read())
-    return rc_dict['config']['initial-technology']
+    if os.path.isdir(klayout_home()):
+        rc_file = os.path.join(klayout_home(), 'klayoutrc')
+        if os.path.isfile(rc_file):
+            with open(rc_file, 'r') as file:
+                rc_dict = xml_to_dict(file.read())
+            return rc_dict['config']['initial-technology']
+    return ''
