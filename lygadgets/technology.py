@@ -7,11 +7,11 @@
 
     Nothing happens on import: Autoload from salt is triggered when you ask for either
     - Technology.technology_names, or
-    - Technology.technology_by_name
+    - Technology.technology_by_name, or
     - Technology.has_technology
 
     lygadgets.Technology also offers a new method: register_lyt
-    which takes the .lyt file, turns it into a Technology object, and adds to the class registry
+    which takes the .lyt file, turns it into a Technology object (eventually returns), and adds to the class registry
 '''
 from lygadgets import klayout_home, xml_to_dict
 import os
@@ -42,6 +42,7 @@ class Technology(pya.Technology):
     def register_lyt(cls, lyt_filename):
         pya_tech = _load_pya_tech(lyt_filename)
         cls._register_pyatech(pya_tech)
+        return pya_tech
 
     @classmethod
     def _load_salt(cls):
@@ -84,7 +85,7 @@ class Technology(pya.Technology):
 
 def _load_pya_tech(lyt_filename):
     ''' Parses the .lyt which is in xml format.
-        Returns the new Technology object, does not register it to the Technology class
+        Returns the new Technology object. Does not register it to the Technology class
     '''
     # workaround while https://github.com/klayoutmatthias/klayout/pull/215 is not solved
     absolute_filepath = os.path.realpath(os.path.expanduser(lyt_filename))

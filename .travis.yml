@@ -11,7 +11,7 @@ install:
   - pip install .
 # this is a dummy script
 script:
-  - DOCKER=1 python import_test.py
+  - DOCKER=1 python basic_test.py
 
 deploy:
   provider: pypi
