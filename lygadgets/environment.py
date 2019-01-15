@@ -4,15 +4,39 @@ from sys import platform
 
 ''' Detect whether we are in klayout's generic scripting interface
     Since standalone pya has no associated Application, try that
+
+    Also, Determine what we will use for pya.
+    Do not override it with the standalone in sys.modules yet
+    This statement:
+        from lygadgets import pya
+    will not error even if you are not in klayout GSI and don't have the klayout.db standalone
 '''
 try:
     import pya
-    pya.Application
-except (ImportError, AttributeError):
+except ImportError:
     _isGSI = False
+    # perhaps "pya" package didn't get there but you have the klayout package
+    try:
+        import klayout.db as pya
+    except ImportError:
+        _isStandalone = False
+        pya = None
+    else:
+        _isStandalone = True
+        print('Warning: You seem to be using an old version of klayout standalone')
+        print('Warning: Try running "pip install --upgrade klayout"')
 else:
-    _isGSI = True
+    try:
+        pya.Application
+    except AttributeError:
+        _isGSI = False
+        _isStandalone = True
+    else:
+        _isGSI = True
+        _isStandalone = False
+
 isGSI = lambda: _isGSI
+isStandalone = lambda: _isStandalone
 
 
 ''' Klayout can run as a window or in batch mode on command line.
@@ -34,31 +58,6 @@ if isGSI():
 else:
     _isGUI = False
 isGUI = lambda: _isGUI
-
-
-''' Determine what we will use for pya.
-    Do not override it with the standalone in sys.modules yet
-    This statement:
-        from lygadgets import pya
-    will not error even if you are not in klayout GSI and don't have the klayout.db standalone
-'''
-if isGSI():
-    _isStandalone = False
-    # GSI:pya was imported above
-else:
-    try:
-        import pya
-        _isStandalone = True
-    except ImportError:
-        print('Warning: You seem to be using an old version of klayout standalone')
-        print('Warning: Try running "pip install --upgrade klayout"')
-        try:
-            import klayout.db as pya
-            _isStandalone = True
-        except ImportError as err:
-            pya = None
-            _isStandalone = False
-isStandalone = lambda: _isStandalone
 
 
 def klayout_home():
