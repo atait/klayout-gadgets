@@ -2,11 +2,13 @@
     lygadgets.Technology serves as a drop-in for pya.Technology in the pymod standalone.
 
     The difference is that the lygadgets version loads all the installed technologies in salt.
-    This is not a bug. The intention of pymod:pya.Technology is to isolate from the state of a user's machine.
+    This is not a bug. The intention of pymod:pya.Technology is to isolate from the state of a user's machine,
+    but some packages are not associated with a particular technology, so they have to get it from salt.
 
     Nothing happens on import: Autoload from salt is triggered when you ask for either
     - Technology.technology_names, or
     - Technology.technology_by_name
+    - Technology.has_technology
 
     lygadgets.Technology also offers a new method: register_lyt
     which takes the .lyt file, turns it into a Technology object, and adds to the class registry
@@ -70,6 +72,12 @@ class Technology(pya.Technology):
         ''' Equivalent behavior to pya.Technology.technology_by_name() in klayout's GSI '''
         cls._load_salt()
         return super().technology_by_name(tech_name)
+
+    @classmethod
+    def has_technology(cls, tech_name):
+        ''' Equivalent behavior to pya.Technology.has_technology() in klayout's GSI '''
+        cls._load_salt()
+        return super().has_technology(tech_name)
 
     # End of overrides.
 
