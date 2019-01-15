@@ -17,7 +17,8 @@ def test_gui_spoofs():
 def test_technology():
     import pya
     assert pya.Technology.technology_names() == ['']
-    new_klayout_home = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'examples')
+    new_klayout_home = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'examples')
+    new_klayout_home = os.path.realpath(new_klayout_home)
     os.environ['KLAYOUT_HOME'] = new_klayout_home
     assert 'salt_test' in lygadgets.Technology.technology_names()
     tech_obj = lygadgets.Technology.technology_by_name('salt_test')
