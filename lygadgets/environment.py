@@ -76,7 +76,7 @@ def klayout_home():
 
 
 def klayout_version():
-    return '0.25.3'  # TODO: make this not hard coded
+    return '0.26.0.dev11'  # TODO: make this not hard coded
 
 
 def is_windows():
