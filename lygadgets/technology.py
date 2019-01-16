@@ -14,6 +14,7 @@
     which takes the .lyt file, turns it into a Technology object (eventually returns), and adds to the class registry
 '''
 from lygadgets import klayout_home, pya
+import xmltodict
 import os
 
 # default active is tricky and a bad idea if it just for CL convenience
