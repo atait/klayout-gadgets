@@ -108,6 +108,6 @@ def klayout_last_open_technology():
         rc_file = os.path.join(klayout_home(), 'klayoutrc')
         if os.path.isfile(rc_file):
             with open(rc_file, 'r') as file:
-                rc_dict = xmltodict.parse(fx.read(), process_namespaces=True)
+                rc_dict = xmltodict.parse(file.read(), process_namespaces=True)
             return rc_dict['config']['initial-technology']
     return ''
