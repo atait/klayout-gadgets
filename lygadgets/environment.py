@@ -1,6 +1,7 @@
 import os
 import sys
 from sys import platform
+from future.utils import with_metaclass
 
 ''' Detect whether we are in klayout's generic scripting interface
     Since standalone pya has no associated Application, try that
@@ -101,13 +102,13 @@ class NS_Catcher(type):
     def __init__(cls, name, bases, dct):
         if pya is not None:
             setattr(pya, name, cls)
-        super().__init__(name, bases, dct)
+        super(NS_Catcher, cls).__init__(name, bases, dct)
 
     def __getattr__(cls, attr):
         return PhonyClass()
 
 
-class PhonyClass(metaclass=NS_Catcher):
+class PhonyClass(with_metaclass(NS_Catcher, object)):
     ''' It only ever gives instances of PhonyClass when called or as attributes.
         It is good for stifling those long chained calls like::
 
