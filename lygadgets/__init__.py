@@ -1,4 +1,4 @@
-__version__ = '0.1.15'
+__version__ = '0.1.16'
 
 from lygadgets.environment import pya, isGUI, isGSI, patch_environment, klayout_home
 from lygadgets.messaging import message, message_loud
