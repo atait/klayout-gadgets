@@ -26,14 +26,8 @@ except ImportError:
         print('Warning: You seem to be using an old version of klayout standalone')
         print('Warning: Try running "pip install --upgrade klayout"')
 else:
-    try:
-        pya.Application
-    except AttributeError:
-        _isGSI = False
-        _isStandalone = True
-    else:
-        _isGSI = True
-        _isStandalone = False
+    _isGSI = (pya.__package__ == '')  # If True, it implies that pya.Application exists
+    _isStandalone = not _isGSI
 
 isGSI = lambda: _isGSI
 isStandalone = lambda: _isStandalone
