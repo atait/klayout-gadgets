@@ -6,12 +6,9 @@ os: linux
 # klayout builds from source so this saves 15 minutes on subsequent jobs
 cache: pip
 
-install:
-  - pip install -r requirements-test.txt
-  - pip install .
 # this is a dummy script
 script:
-  - DOCKER=1 pytest tests
+  - DOCKER=1 make test
 
 deploy:
   provider: pypi

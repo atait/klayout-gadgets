@@ -1,5 +1,5 @@
 import lygadgets
-import os
+import os, sys
 
 def test_gui_spoofs():
     lygadgets.patch_environment()
@@ -13,6 +13,7 @@ def test_gui_spoofs():
     ui_file.open(pya.QIODevice().ReadOnly)
     window = pya.QFormBuilder().load(ui_file, pya.Application.instance().main_window())
     ui_file.close
+
 
 def test_technology():
     import pya
