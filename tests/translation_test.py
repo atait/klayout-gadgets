@@ -5,11 +5,11 @@ from phidl import Device
 
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__),
                                               '..', 'examples', 'salt', 'lypy_hybrid',
-                                              'tech', 'example_tech', 'pcells')))
-import pcell_examples
+                                              'tech', 'example_tech')))
+from lygadgets_pcells.pcell_examples import some_device
 
 def back_and_forth():
-    init_device = pcell_examples.some_device(10, 20)
+    init_device = some_device(10, 20)
 
     pya_layout = pya.Layout()
     pya_cell = pya_layout.create_cell('newname')
