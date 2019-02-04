@@ -4,7 +4,7 @@
  <description>Tester for lygadgets technology loader</description>
  <dbu>0.001</dbu>
  <base-path/>
- <original-base-path/>
+ <original-base-path>/Users/ant12/Documents/git-projects/layout-code/klayout-gadgets/examples/salt/lypy_hybrid/tech/example_tech</original-base-path>
  <layer-properties_file/>
  <add-other-layers>true</add-other-layers>
  <reader-options>
