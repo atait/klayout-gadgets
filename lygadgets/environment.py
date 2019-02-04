@@ -1,31 +1,55 @@
 import os
 import sys
 from sys import platform
+from future.utils import with_metaclass
 
 ''' Detect whether we are in klayout's generic scripting interface
-    Since pya cannot be imported from outside, try that.
+    Since standalone pya has no associated Application, try that
+
+    Also, Determine what we will use for pya.
+    Do not override it with the standalone in sys.modules yet
+    This statement:
+        from lygadgets import pya
+    will not error even if you are not in klayout GSI and don't have the klayout.db standalone
 '''
 try:
     import pya
-    _isGSI = True
 except ImportError:
     _isGSI = False
+    # perhaps "pya" package didn't get there but you have the klayout package
+    try:
+        import klayout.db as pya
+    except ImportError:
+        _isStandalone = False
+        pya = None
+    else:
+        _isStandalone = True
+        print('Warning: You seem to be using an old version of klayout standalone')
+        print('Warning: Try running "pip install --upgrade klayout"')
+else:
+    _isGSI = (pya.__package__ == '')  # If True, it implies that pya.Application exists
+    _isStandalone = not _isGSI
+
 isGSI = lambda: _isGSI
+isStandalone = lambda: _isStandalone
 
 
 ''' Klayout can run as a window or in batch mode on command line.
     If it launches in batch (-b) or database-only (-zz) mode, then main_window is None.
 
     If however it runs in non-GUI mode (-z), it is not None; however,
-    it has not been given a title yet. (see layApplication.cc)
+    it has not been given a title yet. (see layApplication.cc).
+    This is unstable, so we don't use that information.
+
+    Do not expect this to work in (-z) mode.
 '''
 if isGSI():
-    import pya
-    main = pya.Application.instance().main_window()
-    if main is not None:
-        _isGUI = True
-    else:
+    try:
+        main = pya.Application.instance().main_window()
+    except AttributeError:
         _isGUI = False
+    else:
+        _isGUI = (main is not None)
 else:
     _isGUI = False
 isGUI = lambda: _isGUI
@@ -47,7 +71,7 @@ def klayout_home():
 
 
 def klayout_version():
-    return '0.25.3'  # TODO: make this not hard coded
+    return '0.26.0.dev11'  # TODO: make this not hard coded
 
 
 def is_windows():
@@ -60,27 +84,6 @@ def is_windows():
     else:
         raise ValueError('Unrecognized operating system: {}'.format(platform))
 
-
-
-### The important stuff happens below ###
-
-
-''' Determine what we will use for pya.
-    Do not override it with the standalone in sys.modules yet
-    This statement:
-        from lygadgets import pya
-    will not error even if you are not in klayout GSI and don't have the klayout.db standalone
-'''
-if isGSI():
-    import pya
-    using_standalone = False
-else:
-    try:
-        import klayout.db as pya
-        using_standalone = True
-    except ImportError as err:
-        pya = None
-        using_standalone = False
 
 
 ''' Spoof a whole bunch of stuff related to pya GUI.
@@ -99,13 +102,13 @@ class NS_Catcher(type):
     def __init__(cls, name, bases, dct):
         if pya is not None:
             setattr(pya, name, cls)
-        super().__init__(name, bases, dct)
+        super(NS_Catcher, cls).__init__(name, bases, dct)
 
     def __getattr__(cls, attr):
         return PhonyClass()
 
 
-class PhonyClass(metaclass=NS_Catcher):
+class PhonyClass(with_metaclass(NS_Catcher, object)):
     ''' It only ever gives instances of PhonyClass when called or as attributes.
         It is good for stifling those long chained calls like::
 
@@ -135,11 +138,11 @@ def patch_environment():
 
         Now we start changing things in the environment. Afterwards, this statement:
             import pya
-        might give you regular pya or klayout.db, depending.
+        might give you GSI:pya or pymod:pya, depending.
 
         GUI and Application things are added and/or spoofed.
     '''
-    if using_standalone:
+    if not isStandalone():
         sys.modules['pya'] = pya
 
     if not isGUI():
@@ -160,6 +163,7 @@ def patch_environment():
         class Qt(PhonyClass): pass
 
     if not isGSI():
+
         class PhonyInstance(PhonyClass):
             ''' This has to return a string sometimes '''
             def application_data_path(self):
@@ -170,4 +174,14 @@ def patch_environment():
 
         class Application(PhonyClass):
             instance = PhonyInstance
+
+        ''' Find the python modules that are present in klayout.
+            These get lower import priority than system counterparts, if present
+        '''
+        if os.path.isdir(klayout_home()):
+            for root, dirnames, filenames in os.walk(klayout_home(), followlinks=True):
+                for dn in dirnames:
+                    if dn == 'python':
+                        sys.path.append(os.path.join(root, dn))
+
 

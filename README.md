@@ -117,6 +117,7 @@ NB: This package so far tested on MacOS HighSierra and is expected to work on ot
 
 ### Todo
 - detect version of lypackages and pypackages to determine whether or not to force
+- during lygadgets_link, figure out package dependencies and link those too
 
 #### Authors: Alex Tait, Adam McCaughan, Sonia Buckley, Jeff Chiles, Jeff Shainline, Rich Mirin, Sae Woo Nam
 #### National Institute of Standards and Technology, Boulder, CO, USA
