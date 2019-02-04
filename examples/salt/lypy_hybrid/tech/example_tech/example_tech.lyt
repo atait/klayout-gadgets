@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <technology>
- <name>salt_test</name>
+ <name>example_tech</name>
  <description>Tester for lygadgets technology loader</description>
  <dbu>0.001</dbu>
  <base-path/>
- <original-base-path/>
- <layer-properties_file/>
+ <original-base-path>/Users/ant12/Documents/git-projects/layout-code/klayout-gadgets/examples/salt/lypy_hybrid/tech/example_tech</original-base-path>
+ <layer-properties_file>klayout_layers_lygadgets.lyp</layer-properties_file>
  <add-other-layers>true</add-other-layers>
  <reader-options>
   <common>

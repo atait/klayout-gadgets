@@ -23,23 +23,5 @@ menu = pya.Application.instance().main_window().menu()
 if not(menu.is_menu('lygadget_demo')):
     menu.insert_menu('help_menu', 'lygadget_demo', 'lygadget Demo')
 
-
-# # Attempt to install the python package in the system
-# pypackage_name = 'lybar'
-# lypackage_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-# try:
-#     import lygadgets
-# except ImportError:
-#     pya.MessageBox.info('Message for you',
-#                         ('lygadgets is not visible, ' +
-#                          'so {} autoinstall is unavailable.\n'.format(pypackage_name) +
-#                          'Please install from the salt package manager'),
-#                         pya.MessageBox.Ok)
-# else:
-#     lygadgets.export_to_system(pypackage_name, lypackage_dir)
-
-
-
-
  </text>
 </klayout-macro>
