@@ -64,13 +64,8 @@ def my_argspec(function):
 
 class WrappedPCell(pya.PCellDeclarationHelper):
     ''' Wraps a non-klayout PCell as a klayout PCell.
-        The pcell is here defined as a function with arguments.
-        When produce_impl is called, the cell geometry is compiled and added to this instance's cell.
-
-        The transfer of external pcell geometry is done through a temporary gds file.
-
-        I think this is not specific to phidl implementation. It just needs some function.
-        Oh wait, yes it is (barely) because of write_gds.
+        The pcell is here defined as any function with arguments.
+        This function must return an object that can be handled by any_write. (not specific to phidl implementation)
     '''
     generating_function = None
 
@@ -124,8 +119,33 @@ class WrappedPCell(pya.PCellDeclarationHelper):
         phidl_Device = self.generating_function(*args, **kwargs)
         # Convert phidl.Device to pya.Cell - just geometry
         anyCell_to_anyCell(phidl_Device, self.cell)
-        # Transfer other data (ports, metadata, CML files, etc.)
-        pass  # TODO
+
+
+# class WrappedKLayoutPCell(siepic.KLayoutPCell):
+#     pass
+
+def PCell_to_phidlfunction(pyaPCell):
+    ''' Takes a pcell instance and turns its placement into a function with arguments.
+        This function is returned.
+        return_type is, for example, a phidl.Device
+    '''
+    import phidl
+    all_args, all_kwargs = WrappedPCell.params_to_kwargs(pyaPCell)
+    def pfunc(*args, **kwargs):
+        for k in kwargs.keys():
+            if k not in all_kwargs.keys():
+                raise ValueError('Invalid argument. "{}" is not in {}'.format(k, all_kwargs.keys()))
+        all_kwargs.update(kwargs)
+        for k, v in all_kwargs.keys():
+            setattr(pyaPCell, k, v)
+
+        layout = pya.Layout()
+        layout.place(pyaPCell.pcell())  # WRONG method. I forget what "place" is called
+
+        new_Device = phidl.Device()
+        anyCell_to_anyCell(layout, new_Device)
+        return new_Device
+    return pfunc
 
 
 class WrappedLibrary(pya.Library):

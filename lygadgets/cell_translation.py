@@ -144,4 +144,8 @@ def anyCell_to_anyCell(initial_cell, final_cell):
     any_write(initial_cell, tempfile)
     new_cell = any_read(final_cell, tempfile)
     os.remove(tempfile)
+
+    # Transfer other data (ports, metadata, CML files, etc.)
+    pass  # TODO
+
     return new_cell
