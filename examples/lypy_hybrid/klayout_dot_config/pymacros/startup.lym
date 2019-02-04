@@ -23,6 +23,17 @@ menu = pya.Application.instance().main_window().menu()
 if not(menu.is_menu('lygadget_demo')):
     menu.insert_menu('help_menu', 'lygadget_demo', 'lygadget Demo')
 
+# Make the pcell library. To make sure this works, you have to open the Application and place some pcell instances
+from lygadgets import WrappedLibrary
+import sys, os
+sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 'pcells')))
+from pcell_examples import some_device
+
+class LygadgetTest(WrappedLibrary):
+    tech_name = 'LygadgetTest'
+    all_funcs_to_wrap = [some_device]
+LygadgetTest()
+
 
 # # Attempt to install the python package in the system
 # pypackage_name = 'lybar'

@@ -1,5 +1,5 @@
 import os, sys
-from lygadgets import anyCell_to_anyCell, pya
+from lygadgets import anyCell_to_anyCell, pya, any_write
 from lytest import run_xor
 from phidl import Device
 
@@ -18,7 +18,7 @@ def back_and_forth():
     final_device = Device()
     anyCell_to_anyCell(pya_cell, final_device)
 
-    return init_device, pya_cell, final_device
+    return init_device, pya_layout, final_device
 
 def test_translation_running():
     back_and_forth()
@@ -26,13 +26,13 @@ def test_translation_running():
 def test_translation_correct():
     # do an XOR test
     filenames = ['test{}.gds'.format(ifile) for ifile in range(3)]
-    init_device, pya_cell, final_device = back_and_forth()
-    init_device.write_gds(filenames[0])
-    pya_cell.write(filenames[1])
-    final_device.write_gds(filenames[2])
+    cell_list = back_and_forth()
+    for fn, cell in zip(filenames, cell_list):
+        any_write(cell, fn)
 
     try:
         run_xor(filenames[0], filenames[1])
         run_xor(filenames[0], filenames[2])
     finally:
-        [os.remove(fn) for fn in filenames]
+        # [os.remove(fn) for fn in filenames]
+        pass

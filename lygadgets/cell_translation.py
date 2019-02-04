@@ -26,6 +26,8 @@ def celltype_to_write_function(celltype):
     else:
         if issubclass(celltype, pya.Cell):
             return pya.Cell.write
+        elif issubclass(celltype, pya.Layout):
+            return pya.Layout.write
 
     try: import phidl
     except ImportError: pass
