@@ -1,5 +1,8 @@
 ''' Translation functions that take Cells/Devices in different types of languages
     and convert them to Cells/Devices in other languages
+
+    Supported: phidl, pya (GSI version), klayout.db (standalone version)
+    Not yet supported: nazca, IPKISS, gdspy, other suggestions?
 '''
 import os
 import pya
