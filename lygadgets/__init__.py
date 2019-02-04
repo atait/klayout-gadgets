@@ -5,3 +5,5 @@ from lygadgets.messaging import message, message_loud
 from lygadgets.markup import xml_to_dict
 from lygadgets.system_linker import export_to_system
 from lygadgets.salt_linker import postinstall_hook
+from lygadgets.cell_translation import anyCell_to_anyCell
+from lygadgets.autolibrary import WrappedPCell, WrappedLibrary
