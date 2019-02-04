@@ -4,8 +4,8 @@ from lytest import run_xor
 from phidl import Device
 
 sys.path.append(os.path.realpath(os.path.join(os.path.dirname(__file__),
-                                              '..', 'examples', 'lypy_hybrid',
-                                              'klayout_dot_config', 'pcells')))
+                                              '..', 'examples', 'salt', 'lypy_hybrid',
+                                              'tech', 'example_tech', 'pcells')))
 import pcell_examples
 
 def back_and_forth():
