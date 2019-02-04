@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>Open a layout view</description>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <autorun>false</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut/>
+ <show-in-menu>true</show-in-menu>
+ <menu-path>lygadget_demo.end</menu-path>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text>
+
+from lybar import use_gui
+
+use_gui()
+
+ </text>
+</klayout-macro>

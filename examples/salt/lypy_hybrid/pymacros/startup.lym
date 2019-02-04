@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<klayout-macro>
+ <description>lypy_hybrid initialization</description>
+ <category>pymacros</category>
+ <prolog/>
+ <epilog/>
+ <autorun>true</autorun>
+ <autorun-early>false</autorun-early>
+ <shortcut/>
+ <show-in-menu>false</show-in-menu>
+ <menu-path/>
+ <interpreter>python</interpreter>
+ <dsl-interpreter-name/>
+ <text>
+
+import pya
+import os
+
+pya.Application.instance().main_window().message('Initializing lypy_hybrid', 5000)
+
+# Make the menu
+menu = pya.Application.instance().main_window().menu()
+if not(menu.is_menu('lygadget_demo')):
+    menu.insert_menu('help_menu', 'lygadget_demo', 'lygadget Demo')
+
+ </text>
+</klayout-macro>
