@@ -36,12 +36,13 @@ def draw_port(port, layer=None):
     '''
     if port.parent is None:
         raise ValueError('Port {}: Port needs a parent in which to draw'.format(self.name))
-    triangle_points = np.zeros((3, 2))
+    triangle_points = [[0, 0]] * 3
     triangle_points[0] = port.endpoints[0]
     triangle_points[1] = port.endpoints[1]
     triangle_points[2] = (port.midpoint + (port.normal - port.midpoint) * port.width / 10)[1]
     port.parent.add_polygon(triangle_points, layer)
     port.parent.label(text=port_to_labeltext(port), position=port.midpoint, layer=layer)
+
 
 def phidl_write_gds_and_metadata(device, filename, *args, **kwargs):
     referenced_cells = list(device.get_dependencies(recursive=True))
@@ -53,7 +54,7 @@ def phidl_write_gds_and_metadata(device, filename, *args, **kwargs):
                 draw_port(port, layer=phidl_port_layer)
 
     ### This is the primary wrapped phidl function
-    kwargs['auto_rename'] = False  # we don't want that extra hierarchy layer, 'topcell'
+    kwargs['auto_rename'] = kwargs.get('auto_rename', False)  # we don't want that extra hierarchy layer, 'topcell'
     device.write_gds(filename, *args, **kwargs)
     ###
 
@@ -64,17 +65,19 @@ def phidl_write_gds_and_metadata(device, filename, *args, **kwargs):
 
 
 def phidl_import_gds_and_metadata(filename, cellname=None, flatten=False):
-    D = pg.import_gds(filename, cellname=cellname, flatten=flatten)
-    for subD in D_list: # Walk through cells
+    device = pg.import_gds(filename, cellname=cellname, flatten=flatten)
+    referenced_cells = list(device.get_dependencies(recursive=True))
+    all_cells = [device] + referenced_cells
+    for subcell in all_cells: # Walk through cells
         # Extract GDS-visible ports
         if phidl_port_layer is not None:
-            for lab in subD.labels:
+            for lab in subcell.labels:
                 if lab.layer == phidl_port_layer:
                     the_port = port_from_labeltext(lab.text)
                     the_port.midpoint = lab.position
-                    subD.add_port(port=the_port)
-            subD.remove_layers(layers=[phidl_port_layer])
-    return D
+                    subcell.add_port(port=the_port)
+            subcell.remove_layers(layers=[phidl_port_layer])
+    return device
 
 
 def celltype_to_write_function(celltype):
