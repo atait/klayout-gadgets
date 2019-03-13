@@ -126,7 +126,6 @@ def celltype_to_read_function(celltype):
                 else:
                     if port_layer is None:
                         port_layer = default_phidl_portlayer
-                    import pdb; pdb.set_trace()
                     tempdevice = wop(tempdevice, layer=port_layer)
                 # copy over from temporary device
                 phidl_device.elements = tempdevice.elements
