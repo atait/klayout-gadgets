@@ -166,7 +166,7 @@ def dest_from_srcdir(source, exclude_python_types=False):
     elif is_pypackage(source) or is_pymodule(source):
         if not exclude_python_types:
             link_dir = os.path.join(klayout_home(), 'python')
-            link_name = os.path.splitext(os.path.basename(source))[0]
+            link_name = os.path.basename(source)
         else:
             return None
             # raise TypeError('Python thing found but it is being excluded')
