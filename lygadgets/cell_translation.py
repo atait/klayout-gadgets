@@ -128,7 +128,11 @@ def celltype_to_read_function(celltype):
                         port_layer = default_phidl_portlayer
                     tempdevice = wop(tempdevice, layer=port_layer)
                 # copy over from temporary device
-                return tempdevice
+                phidl_device.elements = tempdevice.elements
+                phidl_device.ports = tempdevice.ports
+                phidl_device.labels = tempdevice.ports
+                phidl_device.name = tempdevice.name
+                return phidl_device
             return phidlDevice_reader
 
     # try: import gdspy
