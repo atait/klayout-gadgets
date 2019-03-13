@@ -5,8 +5,6 @@
     Not yet supported: nazca, IPKISS, gdspy, other suggestions?
 '''
 import os
-import pya
-import json
 
 default_phidl_portlayer = 41
 
