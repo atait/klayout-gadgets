@@ -101,6 +101,7 @@ def celltype_to_read_function(celltype):
     else:
         if issubclass(celltype, phidl.Device):
             def phidlDevice_reader(phidl_device, filename, *args, port_layer=None, **kwargs):
+                # phidl_device is not really used. It is just there to determine type.
                 #### hacks, because sometimes pya saves an extra topcell called $$$CONTEXT_INFO$$$
                 from gdspy import GdsLibrary
                 gdsii_lib = GdsLibrary()
@@ -127,10 +128,7 @@ def celltype_to_read_function(celltype):
                         port_layer = default_phidl_portlayer
                     tempdevice = wop(tempdevice, layer=port_layer)
                 # copy over from temporary device
-                for e in tempdevice.elements:
-                    phidl_device.elements.append(e)
-                phidl_device.name = tempdevice.name
-                return phidl_device
+                return tempdevice
             return phidlDevice_reader
 
     # try: import gdspy
