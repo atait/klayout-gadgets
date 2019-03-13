@@ -9,7 +9,7 @@
 # Todo: handle TypeList and TypeLayer arguments
 # Going to be difficult to handle: arguments that are other phidl.Device objects or functions
 
-import pya
+from lygadgets import pya
 import os
 from inspect import signature
 from lygadgets import anyCell_to_anyCell
