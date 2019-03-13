@@ -8,77 +8,7 @@ import os
 import pya
 import json
 
-### support port translation in phidl ###
-from phidl import geometry as pg, Device, Port
-phidl_port_layer, phidl_port_datatype = None, 0
-
-def port_to_labeltext(port):
-    essential_info = (str(port.name),
-                      # port.midpoint,  # rather than put this in the text, use the label position
-                      float(port.width),
-                      float(port.orientation),
-                      # port.parent,  # this is definitely not serializable
-                      # port.info,  # would like to include, but it might go longer than 1024 characters
-                      # port.uid,  # not including because it is part of the build process, not the port state
-                     )
-    return json.dumps(essential_info)
-
-
-def port_from_labeltext(label_text):
-    # You will have to set the midpoint elsewhere
-    name, width, orientation = json.loads(label_text)
-    return Port(name=name, width=width, orientation=orientation)
-
-
-def draw_port(port, layer=None):
-    ''' Puts a triangle down in the actual geometry that will go to GDS.
-        Similar to what quickplot does
-    '''
-    if port.parent is None:
-        raise ValueError('Port {}: Port needs a parent in which to draw'.format(self.name))
-    triangle_points = [[0, 0]] * 3
-    triangle_points[0] = port.endpoints[0]
-    triangle_points[1] = port.endpoints[1]
-    triangle_points[2] = (port.midpoint + (port.normal - port.midpoint) * port.width / 10)[1]
-    port.parent.add_polygon(triangle_points, layer)
-    port.parent.label(text=port_to_labeltext(port), position=port.midpoint, layer=layer)
-
-
-def phidl_write_gds_and_metadata(device, filename, *args, **kwargs):
-    referenced_cells = list(device.get_dependencies(recursive=True))
-    all_cells = [device] + referenced_cells
-    # Insert GDS-visible ports
-    if phidl_port_layer is not None:
-        for cell in all_cells:
-            for port in cell.ports.values():
-                draw_port(port, layer=phidl_port_layer)
-
-    ### This is the primary wrapped phidl function
-    kwargs['auto_rename'] = kwargs.get('auto_rename', False)  # we don't want that extra hierarchy layer, 'topcell'
-    device.write_gds(filename, *args, **kwargs)
-    ###
-
-    # Take port geometry back out
-    if phidl_port_layer is not None:
-        for cell in all_cells:
-            cell.remove_layers(layers=[phidl_port_layer])
-
-
-def phidl_import_gds_and_metadata(filename, cellname=None, flatten=False):
-    device = pg.import_gds(filename, cellname=cellname, flatten=flatten)
-    referenced_cells = list(device.get_dependencies(recursive=True))
-    all_cells = [device] + referenced_cells
-    for subcell in all_cells: # Walk through cells
-        # Extract GDS-visible ports
-        if phidl_port_layer is not None:
-            for lab in subcell.labels:
-                if lab.layer == phidl_port_layer:
-                    the_port = port_from_labeltext(lab.text)
-                    the_port.midpoint = lab.position
-                    subcell.add_port(port=the_port)
-            subcell.remove_layers(layers=[phidl_port_layer])
-    return device
-
+default_phidl_portlayer = 41
 
 def celltype_to_write_function(celltype):
     ''' Takes a class that represents a layout Cell and gives a function that writes its geometry to disc
@@ -108,7 +38,17 @@ def celltype_to_write_function(celltype):
     except ImportError: pass
     else:
         if issubclass(celltype, phidl.Device):
-            return phidl_write_gds_and_metadata
+            def write_with_ports(device, filename, *args, port_layer=None, **kwargs):
+                if port_layer is None:
+                    port_layer = default_phidl_portlayer
+                try:
+                    wgp = phidl.geometry.with_geometric_ports
+                except AttributeError:  # it is an older version of phidl
+                    pass
+                else:
+                    device = wgp(device, layer=port_layer)
+                device.write_gds(filename, *args, **kwargs)
+            return write_with_ports
 
     # try: import gdspy
     # except ImportError: pass
@@ -162,7 +102,7 @@ def celltype_to_read_function(celltype):
     except ImportError: pass
     else:
         if issubclass(celltype, phidl.Device):
-            def phidlDevice_reader(phidl_device, filename, *args, **kwargs):
+            def phidlDevice_reader(phidl_device, filename, *args, port_layer=None, **kwargs):
                 #### hacks, because sometimes pya saves an extra topcell called $$$CONTEXT_INFO$$$
                 from gdspy import GdsLibrary
                 gdsii_lib = GdsLibrary()
@@ -175,7 +115,20 @@ def celltype_to_read_function(celltype):
                         if tc.name != '$$$CONTEXT_INFO$$$':
                             cellname = tc.name
                 #### end hacks
-                tempdevice = phidl_import_gds_and_metadata(filename, *args, cellname=cellname, **kwargs)
+
+                # main read function
+                tempdevice = phidl.geometry.import_gds(filename, *args, cellname=cellname, **kwargs)
+
+                # check for port geometry
+                try:
+                    wop = phidl.geometry.with_object_ports
+                except AttributeError:
+                    pass
+                else:
+                    if port_layer is None:
+                        port_layer = default_phidl_portlayer
+                    tempdevice = wop(tempdevice, layer=port_layer)
+                # copy over from temporary device
                 for e in tempdevice.elements:
                     phidl_device.elements.append(e)
                 phidl_device.name = tempdevice.name
