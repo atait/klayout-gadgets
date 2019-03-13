@@ -21,6 +21,9 @@ def celltype_to_write_function(celltype):
                                     + 'Supported languages are: pya, phidl\n'
                                     + 'Future support will include: gdspy, nazca, ipkiss'))
 
+    if type(celltype) is not type:
+        celltype = type(celltype)
+
     try: import pya  # ok I know we already imported this, but in the future it can also be on-the-fly (i.e. converting phidl to nazca)
     except ImportError: pass
     else:
@@ -37,26 +40,26 @@ def celltype_to_write_function(celltype):
             # we don't want that extra hierarchy layer, 'topcell', so give an extra argument to prevent it
             return lambda *args, **kwargs: write_default(*args, **kwargs, auto_rename=False)
 
-    try: import gdspy
-    except ImportError: pass
-    else:
-        not_supported_error('gdspy')
+    # try: import gdspy
+    # except ImportError: pass
+    # else:
+    #     not_supported_error('gdspy')
 
-    try: import nazca
-    except ImportError: pass
-    else:
-        not_supported_error('nazca')
+    # try: import nazca
+    # except ImportError: pass
+    # else:
+    #     not_supported_error('nazca')
 
-    try: import ipkiss
-    except ImportError: pass
-    else:
-        not_supported_error('ipkiss')
+    # try: import ipkiss
+    # except ImportError: pass
+    # else:
+    #     not_supported_error('ipkiss')
 
     raise TypeError('celltype: {} is not recognized as a layout cell object'.format(celltype.__name__))
 
 
 def any_write(cell, *args, **kwargs):
-    write = celltype_to_write_function(type(cell))
+    write = celltype_to_write_function(cell)
     return write(cell, *args, **kwargs)
 
 
@@ -67,6 +70,9 @@ def celltype_to_read_function(celltype):
         raise NotImplementedError(('The translator does not yet support {}.\n'.format(language_name)
                                     + 'Supported languages are: pya, phidl\n'
                                     + 'Future support will include: gdspy, nazca, ipkiss'))
+
+    if type(celltype) is not type:
+        celltype = type(celltype)
 
     try: import pya  # ok I know we already imported this, but in the future it can also be on-the-fly (i.e. converting phidl to nazca)
     except ImportError: pass
@@ -106,26 +112,26 @@ def celltype_to_read_function(celltype):
                 return phidl_device
             return phidlDevice_reader
 
-    try: import gdspy
-    except ImportError: pass
-    else:
-        not_supported_error('gdspy')
+    # try: import gdspy
+    # except ImportError: pass
+    # else:
+    #     not_supported_error('gdspy')
 
-    try: import nazca
-    except ImportError: pass
-    else:
-        not_supported_error('nazca')
+    # try: import nazca
+    # except ImportError: pass
+    # else:
+    #     not_supported_error('nazca')
 
-    try: import ipkiss
-    except ImportError: pass
-    else:
-        not_supported_error('ipkiss')
+    # try: import ipkiss
+    # except ImportError: pass
+    # else:
+    #     not_supported_error('ipkiss')
 
     raise TypeError('celltype: {} is not recognized as a layout cell object'.format(celltype.__name__))
 
 
 def any_read(cell, *args, **kwargs):
-    read = celltype_to_read_function(type(cell))
+    read = celltype_to_read_function(cell)
     return read(cell, *args, **kwargs)
 
 
