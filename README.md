@@ -81,7 +81,7 @@ If you have the klayout python standalone, that is what you will get as "pya". T
 #### Python packages
 Right after `pip install mypack`, run `lygadgets_link mypack`, and it will show up to klayout's GSI. This creates a symlink from source files to the `~/.klayout/python` directory.
 
-**As of v0.1.24**, this command can also trigger linking of other dependencies. The trigger list is a package attribute called `__lygadget_link__`, defined in `__init__`. Here is where you put pip dependencies:
+**As of v0.1.25**, this command can also trigger linking of other dependencies. The trigger list is a package attribute called `__lygadget_link__`, defined in `__init__`. Here is where you put pip dependencies:
 
 ```python
 # setup.py
@@ -95,7 +95,7 @@ Now, we *also* put them in `__init__.py`.
 
 ``` python
 # lygadgets/__init__.py
-__version__ = '0.1.24'
+__version__ = '0.1.25'
 __lygadget_link__ = ['future', 'xmltodict']
 
 ```
