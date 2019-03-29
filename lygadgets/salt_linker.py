@@ -147,7 +147,11 @@ def srcdir_from_any(source):
         return os.path.realpath(source)
     elif is_installed_python(source):
         module = module_from_str(source)
-        return module.__path__[0]
+        # now figure out if it is a package or a non-packaged module
+        try:
+            return module.__path__[0]
+        except AttributeError:
+            return module.__file__
     else:
         raise FileNotFoundError('{} does not exist'.format(source))
 
