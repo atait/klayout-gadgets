@@ -143,11 +143,18 @@ def is_installed_python(module):
 
 
 def srcdir_from_any(source):
-    if os.path.exists(source):
-        return os.path.realpath(source)
-    elif is_installed_python(source):
+    try:
+        if os.path.exists(source):
+            return os.path.realpath(source)
+    except TypeError:
+        pass
+    if is_installed_python(source):
         module = module_from_str(source)
-        return module.__path__[0]
+        # now figure out if it is a package or a non-packaged module
+        try:
+            return module.__path__[0]
+        except AttributeError:
+            return module.__file__
     else:
         raise FileNotFoundError('{} does not exist'.format(source))
 
@@ -219,11 +226,18 @@ def link_any(any_source, overwrite=False, hard_copy=False, exclude_python_types=
         else:
             symlink_windows(src, dest)
 
-    # klayout will find the lym in the pypackage; the below will double link it
-    # if is_installed_python(any_source) or is_pypackage(any_source):
-    #     for file_obj in os.listdir(src):
-    #         file = os.path.join(src, file_obj)
-    #         link_any(file, overwrite=overwrite, hard_copy=hard_copy, exclude_python_types=True)
+    # __lygadget_link__ is the special top package attribute that triggers more linking.
+    # A list of strings/modules that must be installed or discoverable by import_module
+    if is_installed_python(any_source) or is_pypackage(any_source) or is_pymodule(any_source):
+        module = module_from_str(any_source)
+        try:
+            others_to_link = module.__lygadget_link__
+        except AttributeError:
+            others_to_link = []
+        for other in others_to_link:
+            subsrc, subdest = link_any(other)
+            if subsrc is not None:
+                print('Dependency linked:', any_source, '->', other)
 
     return src, dest
 

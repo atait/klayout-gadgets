@@ -37,6 +37,7 @@ You have a new terminal script that can link all kinds of stuff to the proper pl
 lygadgets_link lygadgets
 ```
 
+
 ## Definition of terms
 **lypackage (or salt package)**: handled by the klayout Package Manager. It includes a `grain.xml`. These can define macros, DRC, python packages, etc.
 
@@ -53,10 +54,6 @@ lygadgets_link lygadgets
 **GSI/klayout namespace** modules visible in GSI. This includes regular python builtins, Pypackages located in salt packages. And *sometimes* the system namespace, but only if you launch klayout from the command line.
 
 **GUI mode**: running scripts when there an open application window. In this mode, GSI is the primary interpreter.
-
-
-## See the example
-I think it's a pretty decent way to see what happens when namespaces get desynchronized, how to use lygadgets, what happens when you call klayout from the command line.
 
 
 ## Features: simple stuff everybody uses for script-based layout
@@ -77,6 +74,34 @@ from lygadgets import pya
 however, of course, you then cannot try to use the GUI features of `pya`. You can't use it at all if you are running system python.
 
 If you have the klayout python standalone, that is what you will get as "pya". Then, its layout database features will be available, just like the regular GSI version of `pya` in batch mode. In GSI mode, lygadgets gives the GSI pya so as not disrupt things.
+
+### Linking all sorts of things into klayout scope
+`lygadgets_link` creates symlinks stuff (pypackages, technologies, salt packages) to the right places, just as if you had downloaded them through salt. Symlinking is useful if you have project that changes, and you want them to be immediately reflected in the application.
+
+#### Python packages
+Right after `pip install mypack`, run `lygadgets_link mypack`, and it will show up to klayout's GSI. This creates a symlink from source files to the `~/.klayout/python` directory.
+
+**As of v0.1.25**, this command can also trigger linking of other dependencies. The trigger list is a package attribute called `__lygadget_link__`, defined in `__init__`. Here is where you put pip dependencies:
+
+```python
+# setup.py
+setup(name='lygadgets',
+      ...
+      install_requires=['future', 'xmltodict'],
+      )
+```
+
+Now, we *also* put them in `__init__.py`.
+
+``` python
+# lygadgets/__init__.py
+__version__ = '0.1.25'
+__lygadget_link__ = ['future', 'xmltodict']
+
+```
+
+Sometimes you get lucky and GSI finds dependencies without the additional linking. While that may work on one system, it might not work on another. Linking makes sure.
+
 
 ### Environment, more aggressive
 GSI pya contains more than the standalone klayout.db. Your exiting python scripts that were run using `klayout -r script.py` and all of its dependencies that auto-run a whole bunch of stuff in their `__init__.py`s -- all of that stuff contains references to pya and GUI features of pya. So you definitely cannot do `python script.py`.
@@ -117,7 +142,6 @@ NB: This package so far tested on MacOS HighSierra and is expected to work on ot
 
 ### Todo
 - detect version of lypackages and pypackages to determine whether or not to force
-- during lygadgets_link, figure out package dependencies and link those too
 
 #### Authors: Alex Tait, Adam McCaughan, Sonia Buckley, Jeff Chiles, Jeff Shainline, Rich Mirin, Sae Woo Nam
 #### National Institute of Standards and Technology, Boulder, CO, USA
