@@ -164,6 +164,10 @@ def patch_environment():
 
     if not isGSI():
 
+        class PhonyMainWindow(PhonyClass):
+            def current_view(self):
+                return None
+
         class PhonyInstance(PhonyClass):
             ''' This has to return a string sometimes '''
             def application_data_path(self):
@@ -171,6 +175,9 @@ def patch_environment():
 
             def version(self):
                 return klayout_version()
+
+            def main_window(self):
+                return PhonyMainWindow()
 
         class Application(PhonyClass):
             instance = PhonyInstance
@@ -181,7 +188,7 @@ def patch_environment():
         if os.path.isdir(klayout_home()):
             for root, dirnames, filenames in os.walk(klayout_home(), followlinks=True):
                 for dn in dirnames:
-                    if dn == 'python':
+                    if dn in ['python', 'pymacros']:
                         sys.path.append(os.path.join(root, dn))
 
 
