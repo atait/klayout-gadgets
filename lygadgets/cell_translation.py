@@ -133,7 +133,8 @@ def celltype_to_read_function(celltype):
                         port_layer = default_phidl_portlayer
                     tempdevice = wop(tempdevice, layer=port_layer)
                 # copy over from temporary device
-                phidl_device.elements = tempdevice.elements
+                phidl_device.polygons = tempdevice.polygons
+                phidl_device.references = tempdevice.references
                 phidl_device.ports = tempdevice.ports
                 phidl_device.labels = tempdevice.labels
                 phidl_device.name = tempdevice.name
