@@ -102,18 +102,23 @@ def celltype_to_read_function(celltype):
         if issubclass(celltype, phidl.Device):
             def phidlDevice_reader(phidl_device, filename, *args, port_layer=None, **kwargs):
                 # phidl_device is not really used. It is just there to determine type.
-                #### hacks, because sometimes pya saves an extra topcell called $$$CONTEXT_INFO$$$
-                from gdspy import GdsLibrary
-                gdsii_lib = GdsLibrary()
-                gdsii_lib.read_gds(filename)
-                top_level_cells = gdsii_lib.top_level()
-                if len(top_level_cells) == 1:
-                    cellname = top_level_cells[0].name
-                if len(top_level_cells) == 2:
-                    for tc in top_level_cells:
-                        if tc.name != '$$$CONTEXT_INFO$$$':
-                            cellname = tc.name
-                #### end hacks
+                if 'cellname' in kwargs:
+                    cellname = kwargs.pop('cellname')
+                else:
+                    #### hacks, because sometimes pya saves an extra topcell called $$$CONTEXT_INFO$$$
+                    from gdspy import GdsLibrary
+                    gdsii_lib = GdsLibrary()
+                    gdsii_lib.read_gds(filename)
+                    top_level_cells = gdsii_lib.top_level()
+                    if len(top_level_cells) == 1:
+                        cellname = top_level_cells[0].name
+                    elif len(top_level_cells) == 2:
+                        for tc in top_level_cells:
+                            if tc.name != '$$$CONTEXT_INFO$$$':
+                                cellname = tc.name
+                    else:
+                        raise ValueError('There are multiple top level cells: {}.\n Please specify with the cellname argument.'.format(top_level_cells))
+                    #### end hacks
 
                 # main read function
                 tempdevice = phidl.geometry.import_gds(filename, *args, cellname=cellname, **kwargs)
