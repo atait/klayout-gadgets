@@ -198,7 +198,6 @@ def link_any(any_source, overwrite=False, hard_copy=False, exclude_python_types=
         If you have given it a python package or an installed module with .lym's in it, klayout will automatically find them.
         Note to make sure they come along with the pip distro, use "package_data" in setup.py
     '''
-    # import pdb; pdb.set_trace()
     src = srcdir_from_any(any_source)
     try:
         dest = dest_from_srcdir(src, exclude_python_types=exclude_python_types)
