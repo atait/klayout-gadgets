@@ -116,7 +116,7 @@ Some packages that require lygadgets linking:
 #### Linking technologies
 This usually goes like
 
-```python
+```bash
 lygadgets_link SOEN-PDK/tech/OLMAC
 ```
 
