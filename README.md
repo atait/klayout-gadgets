@@ -149,7 +149,7 @@ Under the hood, lygadgets is taking the phidl Device, writing it to GDS, loading
 <sup>\*</sup>Geometric regression testing is useful. See [lytest](https://github.com/atait/lytest) for that. It's practically necessary for large codebases being modified by multiple people. "Multiple people" can include you and yourself in the future who will have forgotten everything.
 
 #### PCell translation
-This is handled in `lygadgets.autolibrary.WrappedLibrary`. Example call:
+This is handled in `lygadgets.autolibrary.WrappedPCell`. Example call:
 
 ```python
 from lygadgets.autolibrary import WrappedPCell
@@ -166,7 +166,7 @@ wg_cell2, wg_ports2 = WgToSNSPD('My_SNSPD').pcell(pya_layout, params={'wgnw_leng
 This translation can also go from klayout -> phidl.
 
 #### Make your non-klayout PCells available for GUI layout
-Since we can convert any PCell into a klayout PCell. The klayout GUI has a decent interface for inserting PCells interactively. (This is still a little buggy).
+We can now convert any PCell into a klayout PCell. The klayout GUI has a decent interface for inserting PCells interactively.
 
 ```python
 # Macro: klayout_Library.lym. Find it in SOEN-PDK
@@ -178,6 +178,7 @@ class OLMAC_Library(lygadgets.WrappedLibrary):
 OLMAC_Library()  # This registers it with the GUI and the GSI
 ```
 
+(This is still a little buggy).
 
 ### Environment
 See the "examples" directory for more detailed discussion and demonstration.
@@ -211,11 +212,12 @@ Backwards compatibility with GSI is the top priority of `patch_environment`. If 
 - Port translation
 
 
-## Things that lygadgets will never do, for the safety of everybody
+## Things that lygadgets does not do
 
-- no reference to particular technologies or specific types of properties (e.g. "WAVEGUIDES.xml")
+- no non-standard required dependencies (only future and xmltodict)
+- no reference to particular technologies (e.g. OLMAC) or specific types of properties (e.g. "WAVEGUIDES.xml"), except for the sake of documentaion/illustration
 - no calling `subprocess.call('klayout -r foo.py')`
-- no phidl in the implementation. Of course phidl packages will use this one.
+- no phidl in the implementation.
 - `klayout.db` is allowed if it speeds it up, but it cannot be required
 
 
