@@ -5,8 +5,8 @@
     Not yet supported: nazca, IPKISS, gdspy, other suggestions?
 '''
 import os
-import pya
 
+default_phidl_portlayer = 41
 
 def celltype_to_write_function(celltype):
     ''' Takes a class that represents a layout Cell and gives a function that writes its geometry to disc
@@ -36,9 +36,17 @@ def celltype_to_write_function(celltype):
     except ImportError: pass
     else:
         if issubclass(celltype, phidl.Device):
-            write_default = phidl.Device.write_gds
-            # we don't want that extra hierarchy layer, 'topcell', so give an extra argument to prevent it
-            return lambda *args, **kwargs: write_default(*args, **kwargs, auto_rename=False)
+            def write_with_ports(device, filename, *args, port_layer=None, **kwargs):
+                if port_layer is None:
+                    port_layer = default_phidl_portlayer
+                try:
+                    wgp = phidl.geometry.with_geometric_ports
+                except AttributeError:  # it is an older version of phidl
+                    pass
+                else:
+                    device = wgp(device, layer=port_layer)
+                device.write_gds(filename, *args, **kwargs)
+            return write_with_ports
 
     # try: import gdspy
     # except ImportError: pass
@@ -92,22 +100,43 @@ def celltype_to_read_function(celltype):
     except ImportError: pass
     else:
         if issubclass(celltype, phidl.Device):
-            def phidlDevice_reader(phidl_device, filename, *args, **kwargs):
-                #### hacks, because sometimes pya saves an extra topcell called $$$CONTEXT_INFO$$$
-                from gdspy import GdsLibrary
-                gdsii_lib = GdsLibrary()
-                gdsii_lib.read_gds(filename)
-                top_level_cells = gdsii_lib.top_level()
-                if len(top_level_cells) == 1:
-                    cellname = top_level_cells[0].name
-                if len(top_level_cells) == 2:
-                    for tc in top_level_cells:
-                        if tc.name != '$$$CONTEXT_INFO$$$':
-                            cellname = tc.name
-                #### end hacks
+            def phidlDevice_reader(phidl_device, filename, *args, port_layer=None, **kwargs):
+                # phidl_device is not really used. It is just there to determine type.
+                if 'cellname' in kwargs:
+                    cellname = kwargs.pop('cellname')
+                else:
+                    #### hacks, because sometimes pya saves an extra topcell called $$$CONTEXT_INFO$$$
+                    from gdspy import GdsLibrary
+                    gdsii_lib = GdsLibrary()
+                    gdsii_lib.read_gds(filename)
+                    top_level_cells = gdsii_lib.top_level()
+                    if len(top_level_cells) == 1:
+                        cellname = top_level_cells[0].name
+                    elif len(top_level_cells) == 2:
+                        for tc in top_level_cells:
+                            if tc.name != '$$$CONTEXT_INFO$$$':
+                                cellname = tc.name
+                    else:
+                        raise ValueError('There are multiple top level cells: {}.\n Please specify with the cellname argument.'.format(top_level_cells))
+                    #### end hacks
+
+                # main read function
                 tempdevice = phidl.geometry.import_gds(filename, *args, cellname=cellname, **kwargs)
-                for e in tempdevice.elements:
-                    phidl_device.elements.append(e)
+
+                # check for port geometry
+                try:
+                    wop = phidl.geometry.with_object_ports
+                except AttributeError:
+                    pass
+                else:
+                    if port_layer is None:
+                        port_layer = default_phidl_portlayer
+                    tempdevice = wop(tempdevice, layer=port_layer)
+                # copy over from temporary device
+                phidl_device.polygons = tempdevice.polygons
+                phidl_device.references = tempdevice.references
+                phidl_device.ports = tempdevice.ports
+                phidl_device.labels = tempdevice.labels
                 phidl_device.name = tempdevice.name
                 return phidl_device
             return phidlDevice_reader
