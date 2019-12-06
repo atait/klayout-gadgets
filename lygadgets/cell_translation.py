@@ -189,6 +189,7 @@ def anyCell_to_anyCell(initial_cell, final_cell):
 
         The supported types and their mapping to write methods are contained in celltype_to_write_function and celltype_to_read_function.
     '''
+    global do_write_ports
     do_write_ports_orig = do_write_ports
     do_write_ports = True
     tempfile = os.path.realpath('temp_cellTranslation.gds')
