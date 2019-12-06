@@ -6,7 +6,6 @@ except NameError:
 
 import os
 import subprocess
-from setuptools.command.install import install
 from importlib import import_module
 from shutil import rmtree, copytree
 from types import ModuleType
@@ -239,34 +238,3 @@ def link_any(any_source, overwrite=False, hard_copy=False, exclude_python_types=
                 print('Dependency linked:', any_source, '->', other)
 
     return src, dest
-
-
-def postinstall_hook(source):
-    ''' Generates a class that subclasses install.
-        It attempts to link the lypackage_dir into salt.
-
-        It can be run by setup.py with the argument::
-
-            cmdclass={'install': post_install_factory(some_directory)},
-
-        If you use pip, this sript will be blocked. So this method is no longer recommended.
-        Instead, inform the user that they should run
-
-            lygadgets_link yourpackage
-
-        on the command line, after installing via pip
-    '''
-    class PostInstall(install):
-        def run(self):
-            install.run(self)
-            try:
-                the_link = link_any(source)
-                if the_link is not None:
-                    print('\nAutoinstall into klayout succeeded!\n{}\n'.format(the_link))
-                else:
-                    print('Folder already present. Not overwriting.')
-            except Exception as err:
-                print('Autoinstall into klayout failed with the following\n')
-                print(err)
-                print('\nYou must perform a manual install as described in a README.')
-    return PostInstall
