@@ -35,7 +35,6 @@ else:
         @classmethod
         def _register_pyatech(cls, pya_tech):
             if cls.has_technology(pya_tech.name):
-                print("Warning: overwriting %s technology" % pya_tech.name)
                 new_tech = cls.technology_by_name(pya_tech.name)
             else:
                 new_tech = cls.create_technology(pya_tech.name)

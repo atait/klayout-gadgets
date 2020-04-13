@@ -7,6 +7,7 @@
 import os
 
 default_phidl_portlayer = 41
+do_write_ports = True
 
 def celltype_to_write_function(celltype):
     ''' Takes a class that represents a layout Cell and gives a function that writes its geometry to disc
@@ -35,18 +36,31 @@ def celltype_to_write_function(celltype):
     try: import phidl
     except ImportError: pass
     else:
-        if issubclass(celltype, phidl.Device):
-            def write_with_ports(device, filename, *args, port_layer=None, **kwargs):
-                if port_layer is None:
-                    port_layer = default_phidl_portlayer
-                try:
-                    wgp = phidl.geometry.with_geometric_ports
-                except AttributeError:  # it is an older version of phidl
-                    pass
-                else:
-                    device = wgp(device, layer=port_layer)
-                device.write_gds(filename, *args, **kwargs)
-            return write_with_ports
+        if issubclass(celltype, (phidl.Device, phidl.device_layout.DeviceReference)):
+            if do_write_ports:
+                def write_with_ports(device, filename, *args, port_layer=None, **kwargs):
+                    if port_layer is None:
+                        port_layer = default_phidl_portlayer
+                    # If its a reference, use its parent
+                    if issubclass(celltype, phidl.device_layout.DeviceReference):
+                        device = device.parent
+                    # Try to convert to geometric ports
+                    try:
+                        port2geom = phidl.geometry.ports_to_geometry
+                    except AttributeError:  # it is an older version of phidl
+                        pass
+                    else:
+                        device = port2geom(device, layer=port_layer)
+                    # The actual write
+                    device.write_gds(filename, *args, **kwargs)
+                return write_with_ports
+            else:
+                def write_parent(device, filename, *args, **kwargs):
+                    # If its a reference, use its parent
+                    if issubclass(celltype, phidl.device_layout.DeviceReference):
+                        device = device.parent
+                    device.write_gds(filename, *args, **kwargs)
+                return write_parent
 
     # try: import gdspy
     # except ImportError: pass
@@ -102,18 +116,23 @@ def celltype_to_read_function(celltype):
         if issubclass(celltype, phidl.Device):
             def phidlDevice_reader(phidl_device, filename, *args, port_layer=None, **kwargs):
                 # phidl_device is not really used. It is just there to determine type.
-                #### hacks, because sometimes pya saves an extra topcell called $$$CONTEXT_INFO$$$
-                from gdspy import GdsLibrary
-                gdsii_lib = GdsLibrary()
-                gdsii_lib.read_gds(filename)
-                top_level_cells = gdsii_lib.top_level()
-                if len(top_level_cells) == 1:
-                    cellname = top_level_cells[0].name
-                if len(top_level_cells) == 2:
-                    for tc in top_level_cells:
-                        if tc.name != '$$$CONTEXT_INFO$$$':
-                            cellname = tc.name
-                #### end hacks
+                if 'cellname' in kwargs:
+                    cellname = kwargs.pop('cellname')
+                else:
+                    #### hacks, because sometimes pya saves an extra topcell called $$$CONTEXT_INFO$$$
+                    from gdspy import GdsLibrary
+                    gdsii_lib = GdsLibrary()
+                    gdsii_lib.read_gds(filename)
+                    top_level_cells = gdsii_lib.top_level()
+                    if len(top_level_cells) == 1:
+                        cellname = top_level_cells[0].name
+                    elif len(top_level_cells) == 2:
+                        for tc in top_level_cells:
+                            if tc.name != '$$$CONTEXT_INFO$$$':
+                                cellname = tc.name
+                    else:
+                        raise ValueError('There are multiple top level cells: {}.\n Please specify with the cellname argument.'.format(top_level_cells))
+                    #### end hacks
 
                 # main read function
                 tempdevice = phidl.geometry.import_gds(filename, *args, cellname=cellname, **kwargs)
@@ -128,7 +147,8 @@ def celltype_to_read_function(celltype):
                         port_layer = default_phidl_portlayer
                     tempdevice = wop(tempdevice, layer=port_layer)
                 # copy over from temporary device
-                phidl_device.elements = tempdevice.elements
+                phidl_device.polygons = tempdevice.polygons
+                phidl_device.references = tempdevice.references
                 phidl_device.ports = tempdevice.ports
                 phidl_device.labels = tempdevice.labels
                 phidl_device.name = tempdevice.name
@@ -169,8 +189,16 @@ def anyCell_to_anyCell(initial_cell, final_cell):
 
         The supported types and their mapping to write methods are contained in celltype_to_write_function and celltype_to_read_function.
     '''
+    global do_write_ports
+    do_write_ports_orig = do_write_ports
+    do_write_ports = True
     tempfile = os.path.realpath('temp_cellTranslation.gds')
     any_write(initial_cell, tempfile)
     new_cell = any_read(final_cell, tempfile)
     os.remove(tempfile)
+    do_write_ports = do_write_ports_orig
+
+    # Transfer other data (ports, metadata, CML files, etc.)
+    pass  # TODO
+
     return new_cell
