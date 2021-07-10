@@ -1,7 +1,7 @@
 ''' Access the linkers from the command line
 '''
 import argparse
-from lygadgets.salt_linker import link_any
+from lygadgets.salt_linker import link_any, unlink_any
 from lygadgets import __version__
 
 
@@ -26,3 +26,14 @@ def cm_link_any():
         print('From:', the_links[0])
         print('To:  ', the_links[1])
 
+
+unlink_parser = argparse.ArgumentParser(description='lygadgets unlink anything')
+unlink_parser.add_argument('sourcepackage', type=str,
+                    help='the package to unlink. Can be name of a package or technology')
+unlink_parser.add_argument('-f', '--force', action='store_true',
+                    help='delete non-symlink directories. Be careful')
+unlink_parser.add_argument('-v', '--version', action='version', version=f'%(prog)s v{__version__}')
+
+def cm_unlink_any():
+    args = unlink_parser.parse_args()
+    unlink_any(args.sourcepackage, force=args.force)

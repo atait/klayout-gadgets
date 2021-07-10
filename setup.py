@@ -18,5 +18,8 @@ setup(name='lygadgets',
       install_requires=['future', 'xmltodict'],
       package_data={'': ['*.lym']},
       include_package_data=True,
-      entry_points={'console_scripts': ['lygadgets_link=lygadgets.command_line:cm_link_any']},
+      entry_points={'console_scripts': [
+        'lygadgets_link=lygadgets.command_line:cm_link_any',
+        'lygadgets_unlink=lygadgets.command_line:cm_unlink_any',
+      ]},
       )

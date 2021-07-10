@@ -238,3 +238,31 @@ def link_any(any_source, overwrite=False, hard_copy=False, exclude_python_types=
                 print('Dependency linked:', any_source, '->', other)
 
     return src, dest
+
+
+def unlink_any(installed_name, force=False):
+    matches = []
+    search_dir = os.path.join(klayout_home(), 'python')
+    for fname in os.listdir(search_dir):
+        if fname == installed_name:
+            matches.append(os.path.join(search_dir, fname))
+    search_dir = os.path.join(klayout_home(), 'tech')
+    for fname in os.listdir(search_dir):
+        if fname == installed_name:
+            matches.append(os.path.join(search_dir, fname))
+    if len(matches) == 0:
+        print('Did not find matching installed package for "{}"'.format(installed_name))
+    elif len(matches) > 1:
+        print('Multiple matches found. Delete manually')
+        print('\n'.join(matches))
+    else:
+        match = matches[0]
+        if os.path.islink(match):
+            os.remove(match)
+            print('Removed symlink', match)
+        elif force:
+            shutil.rmtree(match)
+            print('Removed directory', match)
+        else:
+            print(match, 'is a directory, not a symlink.')
+            print('Use the -f option if you are sure you want to permanently delete.')
