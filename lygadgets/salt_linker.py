@@ -5,6 +5,7 @@ except NameError:
     FileNotFoundError = IOError
 
 import os
+import ast
 import subprocess
 from importlib import import_module
 from shutil import rmtree, copytree
@@ -174,10 +175,10 @@ def dest_from_srcdir(source, exclude_python_types=False):
             link_dir = os.path.join(klayout_home(), 'python')
             link_name = os.path.basename(source)
         else:
-            return None
-            # raise TypeError('Python thing found but it is being excluded')
+            # return None
+            raise TypeError('Python code found but it is being excluded: ' + source)
     else:
-        raise TypeError('Did not recognize the klayout relevance/format of {}'.format(source))
+        raise TypeError('Did not recognize the klayout relevance of {}'.format(source))
 
     if not os.path.exists(link_dir):
         os.mkdir(link_dir)
@@ -185,12 +186,12 @@ def dest_from_srcdir(source, exclude_python_types=False):
     return link
 
 
-def link_any(any_source, overwrite=False, hard_copy=False, exclude_python_types=False):
+def link_any(any_source, overwrite=False, hard_copy=False, keep_links=False, exclude_python_types=False):
     ''' Directories take precedence over installed python module
 
         Platform independent.
 
-        Always overwrites existing symbolic links.
+        If keep_links=False, overwrites existing symbolic links.
 
         Returns the full paths of source and destination if the link was created, otherwise None for both.
 
@@ -201,41 +202,83 @@ def link_any(any_source, overwrite=False, hard_copy=False, exclude_python_types=
     try:
         dest = dest_from_srcdir(src, exclude_python_types=exclude_python_types)
     except TypeError as err:
-        return None, None
-    if dest is None:
+        print(err)
         return None, None
 
     if src == dest:
         # Prevent circular reference
+        print('Circular reference')
+        print(src)
         return None, None
     if os.path.islink(dest):
-        os.remove(dest)
+        if not keep_links:
+            os.remove(dest)
+        else:
+            print(any_source, 'already installed')
+            return None, None
     if os.path.exists(dest):
         if overwrite:
             rmtree(dest)
         else:
+            print('Not linking. Destination has a non-symlink item present that would be overwritten.')
+            print('Use -f command line option to overwrite, or use lygadgets_unlink to remove it first')
+            print(dest)
             return None, None
 
     if hard_copy:
         copytree(src, dest)
+        print('Successfully created a hard copy')
     else:
         if not is_windows():
             os.symlink(src, dest)
         else:
             symlink_windows(src, dest)
+        print('Successfully created a symbolic link')
+    print('From:', src)
+    print('To:  ', dest)
 
     # __lygadget_link__ is the special top package attribute that triggers more linking.
     # A list of strings/modules that must be installed or discoverable by import_module
-    if is_installed_python(any_source) or is_pypackage(any_source) or is_pymodule(any_source):
+    others_to_link = []
+    if is_installed_python(any_source):
         module = module_from_str(any_source)
         try:
             others_to_link = module.__lygadget_link__
         except AttributeError:
-            others_to_link = []
-        for other in others_to_link:
-            subsrc, subdest = link_any(other)
-            if subsrc is not None:
-                print('Dependency linked:', any_source, '->', other)
+            pass
+    elif is_pypackage(any_source) or is_pymodule(any_source):
+        # Find that assignment, but don't import the module
+        if is_pypackage(any_source):
+            code_file = os.path.join(any_source, '__init__.py')
+        else:
+            code_file = any_source
+        with open(code_file) as fx:
+            code_text = fx.read()
+
+        for line in code_text.split('\n'):
+            if '__lygadget_link__' in line:
+                code_ast = ast.parse(line)
+                try:
+                    assign_ast = code_ast.body[0]
+                    assert isinstance(assign_ast, ast.Assign)
+                    assert assign_ast.targets[0].id == '__lygadget_link__'
+                    if isinstance(assign_ast.value, ast.Constant):
+                        others_to_link = [assign_ast.value.value]
+                    elif isinstance(assign_ast.value, (ast.List, ast.Tuple)):
+                        others_to_link = [e.value for e in assign_ast.value.elts]
+                    else:
+                        raise TypeError('__lygadget_link__ needs to be found in simple assignment')
+                except (AttributeError, TypeError, AssertionError):
+                    # something went wrong
+                    print('Something went wrong linking lygadget dependencies in this line')
+                    print(line)
+                break
+
+    # Do dependency linking
+    for other in others_to_link:
+        subsrc, subdest = link_any(other, keep_links=True)
+        if subsrc is not None:
+            print('Dependency linked:', any_source, '->', other)
 
     return src, dest
 
@@ -261,7 +304,7 @@ def unlink_any(installed_name, force=False):
             os.remove(match)
             print('Removed symlink', match)
         elif force:
-            shutil.rmtree(match)
+            rmtree(match)
             print('Removed directory', match)
         else:
             print(match, 'is a directory, not a symlink.')

@@ -18,13 +18,6 @@ parser.add_argument('-v', '--version', action='version', version=f'%(prog)s v{__
 def cm_link_any():
     args = parser.parse_args()
     the_links = link_any(args.sourcepackage, overwrite=args.force, hard_copy=args.copy)
-    if the_links[0] is None:
-        print('No link made. Destination already has a non-symlink item present.')
-        print('Use -f if you would like to overwrite')
-    else:
-        print('Successfully created a {}'.format('hard copy' if args.copy else 'symbolic link'))
-        print('From:', the_links[0])
-        print('To:  ', the_links[1])
 
 
 unlink_parser = argparse.ArgumentParser(description='lygadgets unlink anything')
