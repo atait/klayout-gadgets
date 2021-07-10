@@ -1,4 +1,4 @@
-__version__ = '0.1.30'
+__version__ = '0.1.31'
 __lygadget_link__ = ['future', 'xmltodict']
 
 from lygadgets.environment import pya, isGUI, isGSI, patch_environment, klayout_home
