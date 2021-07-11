@@ -71,7 +71,10 @@ def klayout_home():
 
 
 def klayout_version():
-    return '0.26.0.dev11'  # TODO: make this not hard coded
+    if isGUI():
+        return pya.Application.instance().version()
+    else:
+        return '0.26.0'  # Hard coded is bad, but pya standalone has no exposed version information
 
 
 def is_windows():
@@ -165,6 +168,8 @@ def patch_environment():
     if not isGSI():
 
         class PhonyMainWindow(PhonyClass):
+            initial_technology = ''
+
             def current_view(self):
                 return None
 
