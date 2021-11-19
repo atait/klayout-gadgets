@@ -50,6 +50,13 @@ else:
             return pya_tech
 
         @classmethod
+        def crawl_for_technologies(cls, path):
+            for root, dirnames, filenames in os.walk(path, followlinks=True):
+                for fn in filenames:
+                    if fn.endswith('.lyt'):
+                        cls.register_lyt(os.path.join(root, fn))
+
+        @classmethod
         def _load_salt(cls):
             ''' Crawls through klayout_home directory looking for .lyt files.
                 Registers them with the class, returns nothing
@@ -58,12 +65,9 @@ else:
                 return None
             cls._salt_loaded = True
             if os.path.isdir(klayout_home()):
-                search_paths = [os.path.join(klayout_home(), rel_path) for rel_path in ['salt', 'tech']]
-                for path in search_paths:
-                    for root, dirnames, filenames in os.walk(path, followlinks=True):
-                        for fn in filenames:
-                            if fn.endswith('.lyt'):
-                                cls.register_lyt(os.path.join(root, fn))
+                cls.crawl_for_technologies(os.path.join(klayout_home(), 'salt'))
+                cls.crawl_for_technologies(os.path.join(klayout_home(), 'tech'))
+
 
         # These override methods of pya.Technology
 
