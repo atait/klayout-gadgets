@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/atait/klayout-gadgets.svg?branch=master)](https://travis-ci.org/atait/klayout-gadgets)
+[![Downloads](https://static.pepy.tech/personalized-badge/lygadgets?period=total&units=international_system&left_color=grey&right_color=brightgreen&left_text=Downloads)](https://pepy.tech/project/lygadgets)
 
 # klayout-gadgets
 
