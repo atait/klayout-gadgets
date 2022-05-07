@@ -20,7 +20,7 @@ def symlink_windows(source, destination):
     try:
         os.symlink(source, destination)
         return
-    except AttributeError:
+    except (AttributeError, OSError):
         pass
 
     # Command line shell
@@ -29,7 +29,12 @@ def symlink_windows(source, destination):
         assert retval == 0
         return
     except (subprocess.CalledProcessError, WindowsError, AssertionError):
-        pass
+        try:
+            retval = subprocess.check_call(f"mklink /J {destination} {source}", shell=True)
+            assert retval == 0
+            return
+        except (subprocess.CalledProcessError, WindowsError, AssertionError):
+            pass
 
     # Big magic with windows-specific package
     # From https://stackoverflow.com/questions/1447575/symlinks-on-windows
