@@ -165,6 +165,9 @@ def patch_environment():
 
         class Qt(PhonyClass): pass
 
+        from lygadgets.technology import Technology
+        pya.Technology = Technology
+
     if not isGSI():
 
         class PhonyMainWindow(PhonyClass):
