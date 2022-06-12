@@ -167,6 +167,7 @@ def patch_environment():
 
         from lygadgets.technology import Technology
         pya.Technology = Technology
+        Technology._load_salt()
 
     if not isGSI():
 

@@ -192,7 +192,7 @@ def anyCell_to_anyCell(initial_cell, final_cell):
     global do_write_ports
     do_write_ports_orig = do_write_ports
     do_write_ports = True
-    tempfile = os.path.realpath('temp_cellTranslation.gds')
+    tempfile = os.path.expanduser('~/temp_cellTranslation.gds')
     any_write(initial_cell, tempfile)
     new_cell = any_read(final_cell, tempfile)
     os.remove(tempfile)
