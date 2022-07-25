@@ -139,7 +139,7 @@ def celltype_to_read_function(celltype):
 
                 # check for port geometry
                 try:
-                    wop = phidl.geometry.with_object_ports
+                    wop = phidl.geometry.geometry_to_ports
                 except AttributeError:
                     pass
                 else:
