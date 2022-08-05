@@ -1,8 +1,10 @@
+
 import xmltodict
 
 def xml_to_dict(xml_content):
+    raise RuntimeError('lygadgets.markup.xml_to_dict is deprecated')
     # to be deprecated
-    return xmltodict.parse(xml_content, process_namespaces=True)
+    # return xmltodict.parse(xml_content, process_namespaces=True)
 
 
 def lyp_to_layerlist(lyp_file):
