@@ -21,6 +21,7 @@ import os
 # perhaps lygadgets has an idea of active technology
 # this would have to be influenced by GUI switches, but those are not global
 
+have_pya = True
 try:
     import pya
 except ImportError:
@@ -28,6 +29,9 @@ except ImportError:
         import klayout.db as pya
     except ImportError:
         print('Did not find pya. You will not be able to use lygadgets.Technology')
+        have_pya = False
+
+if not have_pya:
     class Technology(object):
         pass
 else:
