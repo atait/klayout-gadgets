@@ -7,7 +7,7 @@ def readme():
 
 
 setup(name='lygadgets',
-      version='0.1.34',
+      version='0.1.35',
       description='Tools to make klayout, the standalone, and python environments work better together',
       long_description=readme(),
       long_description_content_type='text/markdown',
