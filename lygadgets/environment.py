@@ -19,13 +19,12 @@ except ImportError:
     # perhaps "pya" package didn't get there but you have the klayout package
     try:
         import klayout.db as pya
-    except ImportError:
-        _isStandalone = False
-        pya = None
-    else:
         _isStandalone = True
-        print('Warning: You seem to be using an old version of klayout standalone')
-        print('Warning: Try running "pip install --upgrade klayout"')
+        # print('Warning: You seem to be using an old version of klayout standalone')
+        # print('Warning: Try running "pip install --upgrade klayout"')
+    except ImportError:
+        pya = None
+        _isStandalone = False
 else:
     _isGSI = (pya.__package__ == '')  # If True, it implies that pya.Application exists
     _isStandalone = not _isGSI
