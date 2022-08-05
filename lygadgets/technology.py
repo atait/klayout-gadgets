@@ -28,8 +28,8 @@ except ImportError:
         import klayout.db as pya
     except ImportError:
         print('Did not find pya. You will not be able to use lygadgets.Technology')
-        class Technology(object):
-            pass
+    class Technology(object):
+        pass
 else:
     class Technology(pya.Technology):
         ''' '''

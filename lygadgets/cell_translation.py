@@ -202,3 +202,35 @@ def anyCell_to_anyCell(initial_cell, final_cell):
     pass  # TODO
 
     return new_cell
+
+
+def phidl2pya_flat(cell, device):
+    ''' Inserts polygons from a phidl device into an existing pya cell.
+        It is simpler than going through GDS, but it is rudimentary.
+        No positioning control. No cell references: auto-flatten.
+        Make sure the Device is moved to the desired location before converting.
+        If you have zeropdk, returns zeropdk.Ports corresponding to the top-level phidl Ports
+
+            Cel = pya.Layout().create_cell('name')
+            Dev = phidl.geometry.rectangle((10, 10))
+            phidl2pya_flat(Cel, Dev)
+    '''
+    import pya
+    device = device.flatten()
+    for container in device.polygons:
+        for lay, dtyp, shape in zip(container.layers, container.datatypes, container.polygons):
+            pya_layer = cell.layout().layer(lay, dtyp)
+            poly_dpts = [pya.DPoint(*f) for f in shape]
+            dpoly = pya.DSimplePolygon(poly_dpts)
+            dpoly.layout(cell, pya_layer)
+    try:
+        from zeropdk.pcell import Port
+    except ImportError:
+        return None
+    else:
+        ports = []
+        for nam, po in device.ports.items():
+            normal_vec = pya.DVector(*(po.normal[1] - po.normal[0]))
+            pyapo = Port(nam, pya.DPoint(*po.midpoint), normal_vec, po.width)
+            ports.append(pyapo)
+        return ports
