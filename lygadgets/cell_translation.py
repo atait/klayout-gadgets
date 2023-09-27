@@ -3,6 +3,12 @@
 
     Supported: phidl, pya (GSI version), klayout.db (standalone version)
     Not yet supported: nazca, IPKISS, gdspy, other suggestions?
+
+    Todo:
+    - zeropdk read/write geometric ports
+    - rudimentary pya2phidl_flat
+    - use tempfile.TemporaryFile within anyCell_to_anyCell
+    - better document and debug anyCell_to_anyCell
 '''
 import os
 

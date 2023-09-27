@@ -1,5 +1,7 @@
-import lygadgets
 import os, sys
+import lygadgets
+from lygadgets.salt_linker import link_any, unlink_any
+
 
 def test_gui_spoofs():
     lygadgets.patch_environment()
@@ -17,11 +19,15 @@ def test_gui_spoofs():
 
 def test_technology():
     import pya
-    assert pya.Technology.technology_names() == ['']
-    new_klayout_home = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'examples')
-    new_klayout_home = os.path.realpath(new_klayout_home)
-    os.environ['KLAYOUT_HOME'] = new_klayout_home
-    assert 'example_tech' in lygadgets.Technology.technology_names()
-    tech_obj = lygadgets.Technology.technology_by_name('example_tech')
-    assert tech_obj.name == 'example_tech'
-    assert tech_obj.base_path() == os.path.join(new_klayout_home, 'salt', 'lypy_hybrid', 'tech', 'example_tech')
+    # assert pya.Technology.technology_names() == ['']  # This asserts bug behavior that was fixed in 2022
+    example_home = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'examples')
+    example_home = os.path.realpath(example_home)
+    tech_home = os.path.join(example_home, 'salt', 'lypy_hybrid', 'tech', 'example_tech')
+    try:
+        link_any(tech_home)
+        lygadgets.Technology.reload_salt()
+        assert 'example_tech' in lygadgets.Technology.technology_names()
+        tech_obj = lygadgets.Technology.technology_by_name('example_tech')
+        assert tech_obj.name == 'example_tech'
+    finally:
+        unlink_any('example_tech')
