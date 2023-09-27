@@ -66,6 +66,10 @@ else:
                 cls.crawl_for_technologies(os.path.join(klayout_home(), 'salt'))
                 cls.crawl_for_technologies(os.path.join(klayout_home(), 'tech'))
 
+        @classmethod
+        def reload_salt(cls):
+            cls._salt_loaded = False
+
 
         # These override methods of pya.Technology
 

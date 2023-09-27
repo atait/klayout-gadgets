@@ -287,14 +287,12 @@ def link_any(any_source, overwrite=False, hard_copy=False, keep_links=False, exc
 
 def unlink_any(installed_name, force=False):
     matches = []
-    search_dir = os.path.join(klayout_home(), 'python')
-    for fname in os.listdir(search_dir):
-        if fname == installed_name:
-            matches.append(os.path.join(search_dir, fname))
-    search_dir = os.path.join(klayout_home(), 'tech')
-    for fname in os.listdir(search_dir):
-        if fname == installed_name:
-            matches.append(os.path.join(search_dir, fname))
+    search_relpaths = ['python', 'tech', 'salt']
+    for relpath in search_relpaths:
+        search_dir = os.path.join(klayout_home(), relpath)
+        for fname in os.listdir(search_dir):
+            if fname == installed_name:
+                matches.append(os.path.join(search_dir, fname))
     if len(matches) == 0:
         print('Did not find matching installed package for "{}"'.format(installed_name))
     elif len(matches) > 1:
