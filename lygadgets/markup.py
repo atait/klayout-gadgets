@@ -2,8 +2,7 @@
 import xmltodict
 
 def xml_to_dict(xml_content):
-    raise RuntimeError('lygadgets.markup.xml_to_dict is deprecated')
-    # to be deprecated
+    raise RuntimeError('lygadgets.markup.xml_to_dict is deprecated. Use the xmltodict package')
     # return xmltodict.parse(xml_content, process_namespaces=True)
 
 

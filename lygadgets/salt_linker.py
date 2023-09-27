@@ -10,8 +10,8 @@ import subprocess
 from importlib import import_module
 from shutil import rmtree, copytree
 from types import ModuleType
+import xmltodict
 
-from lygadgets.markup import xml_to_dict
 from lygadgets.environment import klayout_home, is_windows
 
 
@@ -54,7 +54,8 @@ def symlink_windows(source, destination):
 def lypackage_name(source):
     try:
         with open(os.path.join(source, 'grain.xml')) as grain:
-            return xml_to_dict(grain.read())['salt-grain']['name']
+            grain_dict = xmltodict.parse(grain.read(), process_namespaces=True)
+        return grain_dict['salt-grain']['name']
     except FileNotFoundError as err:
         err.args = ((source +
                      ' does not appear to be a klayout package.' +
@@ -117,7 +118,8 @@ def is_pymacro(source):
     if not is_lymacro(source):
         return False
     with open(source) as macro:
-        interpreter = xml_to_dict(macro.read())['klayout-macro']['interpreter']
+        grain_dict = xmltodict.parse(macro.read(), process_namespaces=True)
+    interpreter = grain_dict['klayout-macro']['interpreter']
     return interpreter.lower() == 'python'
 
 
