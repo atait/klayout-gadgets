@@ -3,11 +3,11 @@
 '''
 import pya
 from lygadgets.technology import Technology
-
+from lygadgets.environment import patch_environment
 
 def gui_window():
     patch_environment()  # makes sure the Application attribute gets spoofed into the standalone
-    import pya
+    from lygadgets import pya
     return pya.Application.instance().main_window()
 
 
